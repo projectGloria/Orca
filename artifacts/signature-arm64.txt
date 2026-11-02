@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Orca Personal, O=Personal, C=TR
+Signer #1 certificate SHA-256 digest: 648016e23858949ef71fac42584cb455a8525d9a786efb5b146b539d66756beb
+Signer #1 certificate SHA-1 digest: c94abb1656fe4c448e2ef66fd5efd86e9645fcbb
+Signer #1 certificate MD5 digest: fe73dd1d049b3c58544bc3bb8c722819
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 198318588574bd69597fafbaab6beb6dc47ff2866ebbf3f9b845b674ffa0dd97
+Signer #1 public key SHA-1 digest: b8959fc57b25abacd2d8af9318e012cceac95bb1
+Signer #1 public key MD5 digest: 22986803558ad03daa329407b48f8206

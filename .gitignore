@@ -1,0 +1,14 @@
+.gradle/
+.kotlin/
+**/build/
+local.properties
+signing.properties
+*.jks
+*.keystore
+captures/
+artifacts/*.apk
+artifacts/*.log
+artifacts/native-packages/
+__pycache__/
+*.pyc
+dist/

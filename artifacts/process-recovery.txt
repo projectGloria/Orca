@@ -1,0 +1,17 @@
+
+io.github.nihil.orca.ProcessRecoveryTest:.
+
+Time: 0.013
+
+OK (1 test)
+
+
+Starting: Intent { cmp=io.github.nihil.orca/.MainActivity }
+
+io.github.nihil.orca.ProcessRecoveryTest:.
+
+Time: 0.044
+
+OK (1 test)
+
+

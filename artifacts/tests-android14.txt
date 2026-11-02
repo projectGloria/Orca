@@ -1,0 +1,15 @@
+
+io.github.nihil.orca.EngineSmokeTest:...
+io.github.nihil.orca.OptionsUiTest:..
+io.github.nihil.orca.OrcaUiTest:......
+io.github.nihil.orca.ProcessRecoveryTest:
+io.github.nihil.orca.ProcessRecoveryTest:
+io.github.nihil.orca.RecoveryTest:.
+io.github.nihil.orca.SourceProbeTest:
+io.github.nihil.orca.SourceProbeTest:
+
+Time: 80.655
+
+OK (14 tests)
+
+

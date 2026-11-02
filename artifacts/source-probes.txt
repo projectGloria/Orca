@@ -1,0 +1,37 @@
+Bundled engine: 2025.11.12
+Manual update: 2026.10.26
+
+YouTube
+https://www.youtube.com/watch?v=jNQXAC9IVRw
+INSPECTED: Me at the zoo; duration 19s; heights [240, 144]
+DOWNLOADED: 474489 bytes; webm
+
+Instagram
+https://www.instagram.com/reel/Chunk8-jurw/
+INSPECTED: Video by instagram; duration 0s; heights [1280, 840]
+DOWNLOADED: 1949801 bytes; mp4
+
+TikTok
+https://www.tiktok.com/@leenabhushan/video/6748451240264420610
+FAILED: ERROR: [TikTok] 6748451240264420610: Your IP address is blocked from accessing this post
+
+
+X
+https://twitter.com/i/cards/tfw/v1/560070183650213889
+FAILED: ERROR: [twitter] 560070183650213889: No video could be found in this tweet
+
+
+Reddit
+https://www.reddit.com/r/aww/comments/90bu6w/heat_index_was_110_degrees_so_we_offered_him_a/
+FAILED: ERROR: [Reddit] 90bu6w: Account authentication is required. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies
+
+
+Facebook
+https://www.facebook.com/radiokicksfm/videos/3676516585958356/
+FAILED: ERROR: [facebook] 3676516585958356: Cannot parse data; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U
+
+
+Direct media
+https://download.samplelib.com/mp4/sample-5s.mp4
+INSPECTED: sample-5s; duration 0s; heights []
+DOWNLOADED: 2848208 bytes; mp4

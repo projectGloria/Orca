@@ -1,0 +1,7 @@
+Bundled engine: 2025.11.12
+Manual update: 2026.10.26
+
+X alternate
+https://twitter.com/starwars/status/665052190608723968
+FAILED: ERROR: [twitter:amplify] 93ad3568-03d2-47b9-a57b-624b88693acd: Unable to download webpage: HTTP Error 500: Domain Not Found (caused by <HTTPError 500: Domain Not Found>)
+
