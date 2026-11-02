@@ -12,3 +12,4 @@ artifacts/native-packages/
 __pycache__/
 *.pyc
 dist/
+*.idsig
