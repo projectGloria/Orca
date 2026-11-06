@@ -18,7 +18,8 @@ class SourceProbeTest {
         val report = File(context.filesDir, "source-probes.txt")
         report.writeText("Bundled engine: ${engine.version()}\n")
         report.appendText("Manual update: ${runCatching { engine.update() }.fold({ it }, { "FAILED: ${it.message}" })}\n")
-        val sources = linkedMapOf(
+        val sourceUrl = InstrumentationRegistry.getArguments().getString("sourceUrl")
+        val sources = if (sourceUrl != null) linkedMapOf("Custom source" to sourceUrl) else linkedMapOf(
             "YouTube" to "https://www.youtube.com/watch?v=jNQXAC9IVRw",
             "Instagram" to "https://www.instagram.com/reel/Chunk8-jurw/",
             "TikTok" to "https://www.tiktok.com/@leenabhushan/video/6748451240264420610",

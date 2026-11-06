@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="io.github.nihil.orca.OptionsUiTest" tests="6" failures="0" errors="0" skipped="0" time="35.1" timestamp="2026-11-02T14:27:07" hostname="localhost">
+  <properties>
+    <property name="device" value="orca34(AVD) - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="singleItemAudioOverrideKeepsBestSourceQuality" classname="io.github.nihil.orca.OptionsUiTest" time="13.444" />
+  <testcase name="playlistCountAndUnavailableEntriesMatchSelection" classname="io.github.nihil.orca.OptionsUiTest" time="4.981" />
+  <testcase name="availableUpdateCanBeDismissedWithoutDownloading" classname="io.github.nihil.orca.AppUpdatesUiTest" time="3.194" />
+  <testcase name="settingsHasSeparateAppUpdateAction" classname="io.github.nihil.orca.AppUpdatesUiTest" time="3.248" />
+  <testcase name="homeLibraryAndSettingsAreReachable" classname="io.github.nihil.orca.OrcaUiTest" time="4.988" />
+  <testcase name="receivingSharedTextOnlyFillsTheLink" classname="io.github.nihil.orca.OrcaUiTest" time="2.832" />
+</testsuite>

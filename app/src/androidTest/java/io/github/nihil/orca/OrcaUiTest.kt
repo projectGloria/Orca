@@ -2,6 +2,8 @@ package io.github.nihil.orca
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import android.Manifest
+import androidx.test.rule.GrantPermissionRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.*
@@ -11,9 +13,10 @@ import kotlinx.coroutines.flow.first
 import android.content.Intent
 
 class OrcaUiTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val notifications = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+    @get:Rule(order = 1) val rule = createAndroidComposeRule<MainActivity>()
     @Test fun homeLibraryAndSettingsAreReachable() {
-        rule.onNodeWithText("Your links.\nYour library.").assertIsDisplayed()
+        rule.onNodeWithText("Keep what\nmoves you.").assertIsDisplayed()
         rule.onNodeWithText("Download", useUnmergedTree = true).assertIsDisplayed()
         rule.onNodeWithContentDescription("Settings").performClick()
         rule.onNodeWithText("Ask before downloading").assertIsDisplayed()

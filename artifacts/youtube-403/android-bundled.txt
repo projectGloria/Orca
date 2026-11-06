@@ -1,0 +1,106 @@
+[debug] Command-line config: ['--ignore-config', '--verbose', '--socket-timeout', '25', '--js-runtimes', 'quickjs:/data/app/~~9n6QfWwBesoqCpuXgnBVKA==/io.github.nihil.orca-dtqxQTA9SaN4CChx2_fbew==/lib/x86_64/libqjs.so', '--ffmpeg-location', '/data/app/~~9n6QfWwBesoqCpuXgnBVKA==/io.github.nihil.orca-dtqxQTA9SaN4CChx2_fbew==/lib/x86_64/libffmpeg.so', '--no-playlist', '--test', '-f', 'bestvideo*+bestaudio/best', '-o', '/data/user/0/io.github.nihil.orca/cache/probe.mp4', 'https://www.youtube.com/watch?v=Dm_n9_XA-mA']
+WARNING: Your yt-dlp version (2025.11.12) is older than 90 days!
+         It is strongly recommended to always use the latest version.
+         Run "yt-dlp --update" or "yt-dlp -U" to update.
+         To suppress this warning, add --no-update to your command/config.
+[debug] Encodings: locale utf-8, fs utf-8, pref utf-8, out utf-8 (dumb,No ANSI), error utf-8 (dumb,No ANSI), screen utf-8 (dumb,No ANSI)
+[debug] yt-dlp version stable@2025.11.12 from yt-dlp/yt-dlp [335653be8] (zip)
+[debug] Python 3.12.11 (CPython x86_64 64bit) - Linux-6.1.23-android14-4-00257-g7e35917775b8-ab9964412-x86_64-with-libc (OpenSSL 3.5.2 5 Aug 2025, libc)
+[debug] exe versions: none
+[debug] Optional libraries: Cryptodome-3.23.0, mutagen-1.47.0, sqlite3-3.50.4, yt_dlp_ejs-0.3.1
+[debug] JS runtimes: quickjs-2025-04-26
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib
+[debug] Plugin directories: none
+[debug] Loaded 1844 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[youtube] Extracting URL: https://www.youtube.com/watch?v=Dm_n9_XA-mA
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs
+[youtube] Dm_n9_XA-mA: Downloading webpage
+[youtube] Dm_n9_XA-mA: Downloading tv client config
+[debug] [youtube] Forcing "main" player JS variant for player 11a45ffb
+        original url = /s/player/11a45ffb/player_es6.vflset/en_US/base.js
+[youtube] Dm_n9_XA-mA: Downloading player 11a45ffb-main
+WARNING: [youtube] Download of 11a45ffb-main failed: [SSL] record layer failure (_ssl.c:2580)
+[youtube] Dm_n9_XA-mA: Downloading tv player API JSON
+[debug] [youtube] Dm_n9_XA-mA: tv player response playability status: UNPLAYABLE
+[youtube] Dm_n9_XA-mA: Downloading android sdkless player API JSON
+[debug] [youtube] Dm_n9_XA-mA: Detected experiment to bind GVS PO Token to video id.
+WARNING: [youtube] Dm_n9_XA-mA: Some web client https formats have been skipped as they are missing a url. YouTube is forcing SABR streaming for this client. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+[info] Dm_n9_XA-mA: Downloading 1 format(s): 399+251-20
+[download] Sleeping 4.00 seconds as required by the site...
+[debug] Invoking http downloader on "https://rr2---sn-u0g3oxu-5q5e.googlevideo.com/videoplayback?expire=1793653246&ei=nqXoasyrIMKggMMPhN_G6Qs&ip=188.119.11.184&id=o-AAseHUZg2ukKz_QzNc6VxChE5VeN2wBgSTGKsIwUYIcO&itag=399&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=544&met=1793631646%2C&mh=Q0&mm=18%2C29&mn=sn-u0g3oxu-5q5e%2Csn-ajnv4c-53&ms=aub%2Crdu&mv=m&mvi=2&pl=24&rms=aub%2Caub&initcwndbps=2325125&bui=AZFAFb_KSBBwszC8yvG22sqEEhSTEC4LLnE8whqIN0H7LrQffaNdnSqe7uKr754RJsyI4LH4J3C9ReDO&spc=mpRQ_1mcWIzvGuulAtrmgvJ0-MoLU5dCdlA_HyVKYnrixJ399BUTbTZl5Azl95hU&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=15743236&dur=60.133&lmt=1780571620839397&mt=1793631197&fvip=1&epbp=1&keepalive=yes&fexp=51565116%2C52184236%2C52271470&c=ANDROID&txp=330A224&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AE0s2JYwRQIhAIcyxWBHu5SlHq7BFqoJLfkAq6LupuLLsoElAL_bd9oyAiA4ETICwtuVz5FUAORshTkSkqMHc7O0yZVRyDzBbpGpDQ%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIgdq9ZQrFt48O4OPk5v5krTBFZV-tdSCs3X5W_YfYvNIcCIQCy-C7lhPq2m1jOWrJJcCIKejMIAdxumcNbSLDubcJHew%3D%3D"
+[download] Destination: /data/user/0/io.github.nihil.orca/cache/probe.mp4.f399.mp4
+
+[download]   0.0% of   15.01MiB at  Unknown B/s ETA Unknown
+[download]   0.0% of   15.01MiB at    2.34MiB/s ETA 00:06  
+[download]   0.0% of   15.01MiB at    3.83MiB/s ETA 00:03
+[download]   0.1% of   15.01MiB at    3.59MiB/s ETA 00:04
+[download] 100% of   10.00KiB in 00:00:00 at 69.55KiB/s  
+[debug] Invoking http downloader on "https://rr2---sn-u0g3oxu-5q5e.googlevideo.com/videoplayback?expire=1793653246&ei=nqXoasyrIMKggMMPhN_G6Qs&ip=188.119.11.184&id=o-AAseHUZg2ukKz_QzNc6VxChE5VeN2wBgSTGKsIwUYIcO&itag=251&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=544&met=1793631646%2C&mh=Q0&mm=18%2C29&mn=sn-u0g3oxu-5q5e%2Csn-ajnv4c-53&ms=aub%2Crdu&mv=m&mvi=2&pl=24&rms=aub%2Caub&initcwndbps=2325125&bui=AZFAFb_KSBBwszC8yvG22sqEEhSTEC4LLnE8whqIN0H7LrQffaNdnSqe7uKr754RJsyI4LH4J3C9ReDO&spc=mpRQ_1mcWIzvGuulAtrmgvJ0-MoLU5dCdlA_HyVKYnrixJ399BUTbTZl5Azl95hU&vprv=1&svpuc=1&xtags=acont%3Doriginal%3Alang%3Den-US&mime=audio%2Fwebm&rqh=1&gir=yes&clen=871358&dur=60.161&lmt=1780572494753994&mt=1793631197&fvip=1&epbp=1&keepalive=yes&fexp=51565116%2C52184236%2C52271470&c=ANDROID&txp=4432534&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AE0s2JYwRQIgM_lcMliwEUAoRmeuCDJsTnM0jcSuDghBze8NL2aOdDcCIQC_baCZ2gOLi2ckIjLIa9_0qLtLZZMDt-fcHYbwUTD40A%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIgdq9ZQrFt48O4OPk5v5krTBFZV-tdSCs3X5W_YfYvNIcCIQCy-C7lhPq2m1jOWrJJcCIKejMIAdxumcNbSLDubcJHew%3D%3D"
+[download] Destination: /data/user/0/io.github.nihil.orca/cache/probe.mp4.f251-20.webm
+
+[download]   0.1% of  850.94KiB at  Unknown B/s ETA Unknown
+[download]   0.4% of  850.94KiB at    1.92MiB/s ETA 00:00  
+[download]   0.8% of  850.94KiB at    2.16MiB/s ETA 00:00
+[download]   1.2% of  850.94KiB at    2.31MiB/s ETA 00:00
+[download] 100% of   10.00KiB in 00:00:00 at 288.88KiB/s 
+[Merger] Merging formats into "/data/user/0/io.github.nihil.orca/cache/probe.mp4.webm"
+ERROR: 'NoneType' object has no attribute 'lower'
+Traceback (most recent call last):
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 1696, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 1852, in __extract_info
+    return self.process_ie_result(ie_result, download, extra_info)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 1911, in process_ie_result
+    ie_result = self.process_video_result(ie_result, download=download)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 3089, in process_video_result
+    self.process_info(new_info)
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 189, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 3614, in process_info
+    replace_info_dict(self.post_process(dl_filename, info_dict, files_to_move))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 3800, in post_process
+    info = self.run_all_pps('post_process', info, additional_pps=info.get('__postprocessors'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 3782, in run_all_pps
+    info = self.run_pp(pp, info)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/YoutubeDL.py", line 3760, in run_pp
+    files_to_delete, infodict = pp.run(infodict)
+                                ^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/common.py", line 23, in run
+    ret = func(self, info, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/common.py", line 128, in wrapper
+    return func(self, info)
+           ^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/ffmpeg.py", line 829, in run
+    self.run_ffmpeg_multiple_files(info['__files_to_merge'], temp_filename, args)
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/ffmpeg.py", line 319, in run_ffmpeg_multiple_files
+    return self.real_run_ffmpeg(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/ffmpeg.py", line 348, in real_run_ffmpeg
+    cmd += itertools.chain.from_iterable(
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/ffmpeg.py", line 349, in <genexpr>
+    make_args(path, list(opts), arg_type, i + 1)
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/ffmpeg.py", line 340, in make_args
+    args += self._configuration_args(self.basename, keys)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/postprocessor/common.py", line 159, in _configuration_args
+    return _configuration_args(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/data/user/0/io.github.nihil.orca/no_backup/youtubedl-android/yt-dlp/yt-dlp/yt_dlp/utils/_utils.py", line 3600, in _configuration_args
+    main_key, exe = main_key.lower(), exe.lower()
+                                      ^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'lower'
+

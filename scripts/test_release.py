@@ -58,7 +58,7 @@ class ReleaseTests(unittest.TestCase):
 
     def test_completed_release_is_not_overwritten(self):
         self.prepare()
-        current = {"isDraft": False, "tagName": "v0.1.1", "assets": [{"name": "orca-update.json", "url": "https://api.github.com/asset/2"}]}
+        current = {"isDraft": False, "tagName": "v0.1.1", "assets": [{"name": "orca-update.json", "apiUrl": "https://api.github.com/asset/2"}]}
         with patch.object(release, "gh", side_effect=[subprocess.CompletedProcess([], 0, json.dumps(current), ""), subprocess.CompletedProcess([], 0, '{"versionCode":2}', "")]) as api:
             release.publish("projectGloria/Orca")
             self.assertEqual(2, api.call_count)

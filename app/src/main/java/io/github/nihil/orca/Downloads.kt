@@ -161,7 +161,8 @@ fun friendlyError(error: Throwable): String {
         "this is a playlist" in text -> error.message.orEmpty()
         listOf("no space left", "not enough space", "disk full", "enospc").any { it in text } -> "Storage is full. Free some space and retry."
         "ip address is blocked" in text || "not available in your country" in text -> "This source blocks access from your network or region. Try another public link."
-        "private" in text || "login" in text || "sign in" in text || "403" in text || "cookies" in text -> "This source requires access or blocks this request. Try another public link."
+        "private" in text || "login" in text || "sign in" in text || "cookies" in text -> "This source requires access or blocks this request. Try another public link."
+        "403" in text -> "The source refused the media request (HTTP 403). Check for an engine update in Settings, then retry. If it persists, view the technical details."
         "drm" in text -> "DRM-protected media is not supported."
         "unsupported url" in text -> "This link is not supported. Try a direct media or public video link."
         "no video could be found" in text -> "No downloadable video was found. Check the original link."

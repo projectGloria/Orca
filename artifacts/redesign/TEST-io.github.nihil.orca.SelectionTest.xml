@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.nihil.orca.SelectionTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-02T14:47:06" hostname="DESKTOP-LCDTOT2" time="0.094">
+  <properties/>
+  <testcase name="sourceNamesDoNotTriggerStorageErrors" classname="io.github.nihil.orca.SelectionTest" time="0.002"/>
+  <testcase name="portraitIsNotRelabeledAsLandscape" classname="io.github.nihil.orca.SelectionTest" time="0.005"/>
+  <testcase name="audioPrefersOriginalAudio" classname="io.github.nihil.orca.SelectionTest" time="0.001"/>
+  <testcase name="limitAppliesToMergedAndCombinedFallback" classname="io.github.nihil.orca.SelectionTest" time="0.002"/>
+  <testcase name="videoWithPlaylistContextIsNotPlaylistOnly" classname="io.github.nihil.orca.SelectionTest" time="0.004"/>
+  <testcase name="extractsEmbeddedSharedLink" classname="io.github.nihil.orca.SelectionTest" time="0.005"/>
+  <testcase name="rejectsNonWebLinks" classname="io.github.nihil.orca.SelectionTest" time="0.0"/>
+  <testcase name="bestDoesNotCapOrExcludeCombinedStreams" classname="io.github.nihil.orca.SelectionTest" time="0.0"/>
+  <testcase name="unicodeFileNamesFitMediaStoreLimits" classname="io.github.nihil.orca.SelectionTest" time="0.071"/>
+  <testcase name="arbitraryDomainIsNotYoutubePlaylist" classname="io.github.nihil.orca.SelectionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

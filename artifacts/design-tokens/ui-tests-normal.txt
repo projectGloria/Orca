@@ -1,0 +1,10 @@
+Command: gradlew.bat connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=io.github.nihil.orca.OptionsUiTest,io.github.nihil.orca.AppUpdatesUiTest,io.github.nihil.orca.OrcaUiTest#homeLibraryAndSettingsAreReachable
+
+Recorded console result:
+Starting 5 tests on orca34(AVD) - 14
+orca34(AVD) - 14 Tests 4/5 completed. (0 skipped) (0 failed)
+Finished 5 tests on orca34(AVD) - 14
+BUILD SUCCESSFUL in 1m 45s
+70 actionable tasks: 9 executed, 61 up-to-date
+
+The connected-test XML directory was replaced by the subsequent enlarged-font run. Its final six-test XML result is retained separately.

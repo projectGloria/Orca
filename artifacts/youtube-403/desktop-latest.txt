@@ -1,0 +1,51 @@
+[debug] Command-line config: ['--ignore-config', '--verbose', '--test', '--no-playlist', '-f', 'bestvideo*+bestaudio/best', '-o', 'artifacts/youtube-403/desktop.%(ext)s', 'https://www.youtube.com/watch?v=Dm_n9_XA-mA']
+[debug] Encodings: locale cp1252, fs utf-8, pref cp1252, out cp1252 (dumb,No ANSI), error cp1252 (dumb,No ANSI), screen cp1252 (dumb,No ANSI)
+[debug] yt-dlp version stable@2026.10.26 from yt-dlp/yt-dlp [c91f8de0b] (zip)
+[debug] Python 3.14.7 (CPython AMD64 64bit) - Windows-11-10.0.26100-SP0 (OpenSSL 3.5.7 9 Jun 2026)
+[debug] exe versions: ffmpeg N-126374-g089a48eb36-20260831 (setts), ffprobe N-126374-g089a48eb36-20260831
+[debug] Optional libraries: Cryptodome-3.24.1, certifi-2026.10.18, curl_cffi-0.16.3, requests-2.34.2, sqlite3-3.50.4, urllib3-2.8.0, yt_dlp_ejs-0.8.0
+[debug] JS runtimes: deno-2.9.7
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, curl_cffi
+[debug] Plugin directories: none
+[debug] Loaded 1747 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno, node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=Dm_n9_XA-mA
+[youtube] Dm_n9_XA-mA: Downloading webpage
+[debug] [youtube] Forcing "main" player JS variant for player 11a45ffb
+        original url = /s/player/11a45ffb/player_es6.vflset/en_US/base.js
+[youtube] Dm_n9_XA-mA: Downloading tv samsung player API JSON
+[youtube] Dm_n9_XA-mA: Downloading visionos player API JSON
+[youtube] Dm_n9_XA-mA: Downloading player 11a45ffb-main
+[youtube] [jsc:deno] Solving JS challenges using deno
+[debug] [youtube] [jsc:deno] Using challenge solver lib script v0.8.0 (source: python package, variant: minified)
+[debug] [youtube] [jsc:deno] Using challenge solver core script v0.8.0 (source: python package, variant: minified)
+[debug] [youtube] [jsc:deno] Running deno: 'C:\Users\Nihil\AppData\Local\Microsoft\WinGet\Packages\DenoLand.Deno_Microsoft.Winget.Source_8wekyb3d8bbwe\deno.EXE' run --ext=js --no-code-cache --no-prompt --no-remote --no-lock --node-modules-dir=none --no-config --no-npm --cached-only -
+[youtube] Dm_n9_XA-mA: Downloading m3u8 information
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+[info] Dm_n9_XA-mA: Downloading 1 format(s): 616+251-20
+[hlsnative] Downloading m3u8 manifest
+[debug] Invoking hlsnative downloader on "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1793653148/ei/PKXoapeiLpuCi9oPoqCLMQ/ip/188.119.11.184/id/0e6fe7f7f5c0fa60/itag/616/source/youtube/requiressl/yes/ratebypass/yes/pfa/1/wft/1/sgovp/clen%3D39123728%3Bdur%3D60.133%3Bgir%3Dyes%3Bitag%3D356%3Blmt%3D1790346210934456/rqh/1/hls_chunk_host/rr2---sn-u0g3oxu-5q5e.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/cps/523/met/1793631548,/mh/Q0/mm/18,29/mn/sn-u0g3oxu-5q5e,sn-ajnv45-5i/ms/aub,rdu/mv/m/mvi/2/pl/24/rms/aub,aub/initcwndbps/2256375/bui/AZFAFb8D1Vpz8ls2EhFRorsWxrSphZcHeGCpJwc9VLV3lHegzeuSXtBJTt3yuej2uEqBeiehYQTN7I0w/spc/mpRQ_zH4gy8LTtOrTDUkbVoUKfB4ReQny3iXosSNit5wRvUkHWHUgEEY5XZWNhs/vprv/1/playlist_type/DVR/dover/13/txp/4400234/epbp/1/mt/1793630952/fvip/2/short_key/1/keepalive/yes/fexp/51565115,52184236,52271469/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,pfa,wft,sgovp,rqh,xpc,bui,spc,vprv,playlist_type/sig/AE0s2JYwRQIhAMh7eLFIKqTVMMornkUbl5lng_ZHwJcGmhUIKFT0LVAtAiBSGYEVlVlb96sj3EkaYqeccTNlnO4qiMgvZwqD-3QTLQ%3D%3D/lsparams/hls_chunk_host,cps,met,mh,mm,mn,ms,mv,mvi,pl,rms,initcwndbps/lsig/APaTxxMwRgIhAM274QOlKhSHOIDB6aMRYD4tcyB8a68f5GkTUcEQ0flhAiEA1i3-e3kZvTUo-M9NP60Tb-xvc54_6LT2mZb8ZFSg7kQ%3D/playlist/index.m3u8"
+[hlsnative] Total fragments: 11
+[download] Destination: artifacts\youtube-403\desktop.f616.mp4
+[debug] File locking is not supported. Proceeding without locking
+
+[download] 100.0% of ~   712.00B at    895.00B/s ETA Unknown (frag 0/11)
+[download]   4.5% of ~  15.30KiB at    895.00B/s ETA Unknown (frag 1/11)
+[download] 100% of    712.00B in 00:00:00 at 2.73KiB/s                  
+[debug] Invoking http downloader on "https://rr2---sn-u0g3oxu-5q5e.googlevideo.com/videoplayback?expire=1793653148&ei=PKXoasqMIqeBi9oPsr7f-Ao&ip=188.119.11.184&id=o-AAvWubEej5iPsDlqQfDvaZlB-xua7OEmt_gx4p6oLM5m&itag=251&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=544&met=1793631548%2C&mh=Q0&mm=18%2C29&mn=sn-u0g3oxu-5q5e%2Csn-ajnv4c-53&ms=aub%2Crdu&mv=m&mvi=2&pl=24&rms=aub%2Caub&initcwndbps=2256375&bui=AZFAFb8hcp0Oln01wAxWP8Fw7_KB5VxeVP-b1o3DrvEjYbbS6rhURE7Yt7VJtIawwN9yfUCPd04QLesF&vprv=1&svpuc=1&xtags=acont%3Doriginal%3Alang%3Den-US&mime=audio%2Fwebm&ns=mpC8OPplhGsuwNa4d-R01cQZ&rqh=1&gir=yes&clen=871358&dur=60.161&lmt=1780572494753994&mt=1793630952&fvip=1&epbp=1&keepalive=yes&lmw=1&fexp=51565115%2C52184236%2C52271469&c=TVHTML5&sefc=1&txp=4432534&n=37ZCP8FWT1A-aA&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AE0s2JYwRQIhANOlWzKE4TUUJemSMA8dvuWaFBBDW1Zp_bUl0-DknhfYAiAZQfdJSs9MG0T-DxFmOkEw1GltS76Y6I9LMO9qmovH1A%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIgT2vptyxwNyfb_jz_olpv9WKI3nWUM7PbgOf7eHAARKsCIQDh3KwiTAlVYuHBn_2n0ERJ8QVeFmZSmWy4c7CDjb--mA%3D%3D"
+[download] Destination: artifacts\youtube-403\desktop.f251-20.webm
+
+[download]   0.1% of  850.94KiB at  598.84KiB/s ETA 00:01
+[download]   0.4% of  850.94KiB at    1.05MiB/s ETA 00:00
+[download]   0.8% of  850.94KiB at    1.89MiB/s ETA 00:00
+[download]   1.2% of  850.94KiB at    2.32MiB/s ETA 00:00
+[download] 100% of   10.00KiB in 00:00:00 at 200.31KiB/s 
+[Merger] Merging formats into "artifacts\youtube-403\desktop.webm"
+[debug] ffmpeg command line: ffmpeg -y -loglevel repeat+info -i file:artifacts\youtube-403\desktop.f616.mp4 -i file:artifacts\youtube-403\desktop.f251-20.webm -c copy -map 0:v:0 -map 1:a:0 -movflags +faststart file:artifacts\youtube-403\desktop.temp.webm
+Deleting original file artifacts\youtube-403\desktop.f251-20.webm (pass -k to keep)
+Deleting original file artifacts\youtube-403\desktop.f616.mp4 (pass -k to keep)

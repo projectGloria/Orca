@@ -23,4 +23,11 @@ class SelectionTest {
         assertTrue(friendlyError(Exception("No space left on device")).contains("Storage"))
         assertTrue(friendlyError(Exception("Your IP address is blocked from accessing this post")).contains("network or region"))
     }
+    @Test fun forbiddenMediaSuggestsEngineUpdateWithoutAssumingLogin() {
+        val message = friendlyError(Exception("ERROR: unable to download video data: HTTP Error 403: Forbidden"))
+        assertTrue(message.contains("engine update"))
+        assertFalse(message.contains("requires access"))
+        assertTrue(friendlyError(Exception("HTTP Error 403: sign in to view this private video")).contains("requires access"))
+        assertTrue(friendlyError(Exception("HTTP Error 403: Your IP address is blocked")).contains("network or region"))
+    }
 }

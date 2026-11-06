@@ -3,11 +3,14 @@ package io.github.nihil.orca
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import android.Manifest
+import androidx.test.rule.GrantPermissionRule
 import org.junit.Rule
 import org.junit.Test
 
 class AppUpdatesUiTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val notifications = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+    @get:Rule(order = 1) val rule = createAndroidComposeRule<MainActivity>()
     @Test fun settingsHasSeparateAppUpdateAction() {
         rule.onNodeWithContentDescription("Settings").performClick()
         rule.onNodeWithText("Check for updates").performScrollTo().assertIsDisplayed()

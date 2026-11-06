@@ -62,7 +62,7 @@ def publish(repository):
     existing = json.loads(current.stdout) if current.returncode == 0 else None
     if existing and any(asset["name"] == "orca-update.json" for asset in existing["assets"]):
         asset = next(asset for asset in existing["assets"] if asset["name"] == "orca-update.json")
-        previous = json.loads(gh("api", asset["url"], "-H", "Accept: application/octet-stream").stdout)
+        previous = json.loads(gh("api", asset["apiUrl"], "-H", "Accept: application/octet-stream").stdout)
         if code != previous["versionCode"]:
             raise ValueError("This versionName is already published. Increase both versionName and versionCode.")
         print(f"{tag} is already complete; published assets are immutable. Bump version.properties for another release.")
