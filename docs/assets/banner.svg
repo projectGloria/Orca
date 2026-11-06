@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="auto">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141813"/>
+      <stop offset="100%" stop-color="#0E100D"/>
+    </linearGradient>
+    <linearGradient id="accentGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C3EF78" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#C3EF78" stop-opacity="0.0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background card -->
+  <rect width="1200" height="360" rx="24" fill="url(#bg)" stroke="#232720" stroke-width="2"/>
+  <rect x="0" y="0" width="600" height="360" rx="24" fill="url(#accentGlow)"/>
+
+  <!-- Brand Icon -->
+  <g transform="translate(80, 100)">
+    <rect width="160" height="160" rx="40" fill="#191C19" stroke="#2B3028" stroke-width="2"/>
+    <g transform="translate(16, 16) scale(2.6666)">
+      <path fill="#C3EF78" d="M7,29C9,16 26,13 36,21L43,17L40,27C33,39 15,39 7,29M23,18L27,8L31,20z"/>
+      <path fill="#F1F2E9" d="M13,29C21,25 31,27 34,31C25,36 17,34 13,29"/>
+      <circle cx="15" cy="24" r="2" fill="#111410"/>
+    </g>
+  </g>
+
+  <!-- Text Block -->
+  <g transform="translate(280, 120)">
+    <!-- Overline -->
+    <text x="0" y="24" fill="#C3EF78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">NATIVE ANDROID 14+ MEDIA DOWNLOADER</text>
+    
+    <!-- Title -->
+    <text x="0" y="80" fill="#F1F2E9" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-1">Orca</text>
+    
+    <!-- Tagline -->
+    <text x="0" y="118" fill="#A8AD9E" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="400">Keep what moves you. On-device yt-dlp &amp; FFmpeg with zero tracking.</text>
+
+    <!-- Feature Chips -->
+    <g transform="translate(0, 150)">
+      <!-- Chip 1 -->
+      <rect x="0" y="0" width="160" height="32" rx="16" fill="#1F241D" stroke="#2F362C" stroke-width="1"/>
+      <text x="80" y="21" fill="#C3EF78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Compose Material 3</text>
+
+      <!-- Chip 2 -->
+      <rect x="172" y="0" width="165" height="32" rx="16" fill="#1F241D" stroke="#2F362C" stroke-width="1"/>
+      <text x="254" y="21" fill="#C3EF78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle">16 KB Page Aligned</text>
+
+      <!-- Chip 3 -->
+      <rect x="349" y="0" width="145" height="32" rx="16" fill="#1F241D" stroke="#2F362C" stroke-width="1"/>
+      <text x="421" y="21" fill="#C3EF78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Original Quality</text>
+
+      <!-- Chip 4 -->
+      <rect x="506" y="0" width="130" height="32" rx="16" fill="#1F241D" stroke="#2F362C" stroke-width="1"/>
+      <text x="571" y="21" fill="#C3EF78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Zero Telemetry</text>
+    </g>
+  </g>
+</svg>

@@ -73,7 +73,16 @@ internal fun captureRedesign(name: String) {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     instrumentation.waitForIdleSync()
     android.os.SystemClock.sleep(600) // Wait for Android window/splash transitions outside the Compose clock.
-    val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+    // Surface transitions can temporarily make UiAutomation return null on an emulator.
+    // Retry capture, but still fail if Android never supplies a usable image.
+    var captured = instrumentation.uiAutomation.takeScreenshot()
+    repeat(5) {
+        if (captured == null) {
+            android.os.SystemClock.sleep(300)
+            captured = instrumentation.uiAutomation.takeScreenshot()
+        }
+    }
+    val bitmap = requireNotNull(captured) { "Android did not provide a screenshot after window transitions." }
     val output = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
         ?: instrumentation.targetContext.getExternalFilesDir(null)!!.absolutePath
     val directory = File(output, "redesign").apply { mkdirs() }

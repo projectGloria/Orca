@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.nihil.orca.AppUpdatesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-02T15:13:21" hostname="DESKTOP-LCDTOT2" time="0.197">
+  <properties/>
+  <testcase name="missingApkIsPreparing" classname="io.github.nihil.orca.AppUpdatesTest" time="0.177"/>
+  <testcase name="sameOrOlderReleaseNeverOffersDowngrade" classname="io.github.nihil.orca.AppUpdatesTest" time="0.002"/>
+  <testcase name="rejectsWrongHostAndRepository" classname="io.github.nihil.orca.AppUpdatesTest" time="0.011"/>
+  <testcase name="emulatorGetsX86Asset" classname="io.github.nihil.orca.AppUpdatesTest" time="0.003"/>
+  <testcase name="rejectsWrongAppAndWrongTag" classname="io.github.nihil.orca.AppUpdatesTest" time="0.002"/>
+  <testcase name="rejectsPrereleaseAndUnsupportedDevice" classname="io.github.nihil.orca.AppUpdatesTest" time="0.001"/>
+  <testcase name="olderInstallGetsArm64Asset" classname="io.github.nihil.orca.AppUpdatesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

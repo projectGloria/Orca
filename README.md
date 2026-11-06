@@ -1,72 +1,260 @@
-# Orca
+<p align="center">
+  <img src="docs/assets/icon.svg" alt="Orca Icon" width="96" height="96" />
+</p>
 
-Native Android 14+ video and audio downloader. Kotlin, Compose Material 3, Room, DataStore, Media3 and on-device yt-dlp/FFmpeg. No backend, login, analytics or cookies.
+<h1 align="center">Orca</h1>
 
-## Build
+<p align="center">
+  <strong>Native Android 14+ video and audio downloader powered by on-device yt-dlp and FFmpeg.</strong>
+</p>
 
-Install JDK 17 and Android SDK platform 35 with build tools 35. Set `JAVA_HOME` and `ANDROID_HOME`, then run:
+<p align="center">
+  <a href="https://github.com/projectGloria/Orca/releases/latest"><img src="https://img.shields.io/github/v/release/projectGloria/Orca?color=C3EF78&label=release" alt="Latest Release" /></a>
+  <a href="https://github.com/projectGloria/Orca/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/projectGloria/Orca/ci.yml?branch=main&label=CI&color=C3EF78" alt="CI Status" /></a>
+  <img src="https://img.shields.io/badge/Android-14%2B%20(API%2034%2B)-111410?logo=android&logoColor=C3EF78" alt="Android 14+" />
+  <img src="https://img.shields.io/badge/ABI-ARM64%20%7C%20x86__64%20(16%20KB)-191C19" alt="16 KB Aligned" />
+  <img src="https://img.shields.io/badge/telemetry-zero-191C19" alt="Zero Telemetry" />
+</p>
 
-```powershell
-.\gradlew.bat testDebugUnitTest lintDebug assembleDebug
-.\gradlew.bat connectedDebugAndroidTest
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="Orca Banner" width="100%" />
+</p>
+
+---
+
+<p align="center">
+  <a href="#about">About</a> &bull;
+  <a href="#features">Features</a> &bull;
+  <a href="#screenshots">Screenshots</a> &bull;
+  <a href="#how-it-works">How it works</a> &bull;
+  <a href="#installation">Installation</a> &bull;
+  <a href="#usage">Usage</a> &bull;
+  <a href="#building-from-source">Building from source</a> &bull;
+  <a href="#configuration-and-updates">Configuration &amp; updates</a> &bull;
+  <a href="#license-and-notices">License &amp; notices</a>
+</p>
+
+---
+
+## About
+
+Orca is a native, modern Android media downloader built with Jetpack Compose Material 3, Room, AndroidX Media3, and an on-device `yt-dlp` and FFmpeg execution engine. It extracts and downloads media entirely on your hardware with no middleman server, no user account, no tracking cookies, and zero analytics.
+
+Downloads run via persistent Android 14+ User-Initiated Transfer services, keeping downloads reliable across app closures and network interruptions while saving original, uncompressed streams directly to your device's public media library.
+
+## Features
+
+- **On-device yt-dlp & FFmpeg engine:** Executes unmodified yt-dlp through Python and QuickJS locally on Android, giving you full extractor support without third-party proxies or cloud backends.
+- **Uncompromised original quality:** Video requests fetch `bestvideo*+bestaudio/best` without forced re-encoding. Audio extraction uses FFmpeg direct stream copy (`-c:a copy`) rather than lossy conversion.
+- **Android 14+ User-Initiated Transfers (UIDT):** Background downloads operate as prioritized user-initiated transfer jobs with real-time notifications, surviving process restarts and recovering interrupted partial streams.
+- **Compose Material 3 design:** Styled in a high-contrast dark palette with responsive layouts, large-font support, and fluid bottom-sheet option selectors.
+- **Playlist batch downloader:** Inspects multi-track URLs and playlists, letting you selectively pick tracks while automatically detecting and disabling private or unavailable entries.
+- **MediaStore integration:** Media files are safely staged in private application storage and published into `Movies/Orca` and `Music/Orca` upon completion, remaining accessible after uninstallation.
+- **Android 15 (16 KB page) compatibility:** Automatically patches bundled WebP native libraries during build to ensure complete 16 KB ELF segment alignment.
+- **Dual updater system:** Independent, user-confirmed GitHub Releases checker for app updates, plus isolated on-device yt-dlp engine updates with atomic backup and rollback.
+
+## Screenshots
+
+<table align="center">
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/assets/home.png" alt="Orca Home Screen" width="280" />
+      <br />
+      <em><strong>Home:</strong> Paste or share links with quick format indicators.</em>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/assets/options.png" alt="Download Options Sheet" width="280" />
+      <br />
+      <em><strong>Options:</strong> Select video resolutions or pure audio stream extraction.</em>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/assets/playlist.png" alt="Playlist Selector Sheet" width="280" />
+      <br />
+      <em><strong>Playlists:</strong> Selective batch download with unavailable-item detection.</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/assets/library.png" alt="Saved Downloads Library" width="280" />
+      <br />
+      <em><strong>Library:</strong> In-app playback, file sharing, and source tracking.</em>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/assets/settings.png" alt="Settings & Updaters" width="280" />
+      <br />
+      <em><strong>Settings:</strong> Download preferences, app updates, and engine updates.</em>
+    </td>
+    <td align="center" width="33%">
+      <!-- Empty cell spacer for balanced layout -->
+    </td>
+  </tr>
+</table>
+
+## How it works
+
+Orca coordinates stream extraction, queue persistence, native execution, and media publication entirely within Android:
+
+```mermaid
+flowchart TD
+    A["Link or Share Intent"] --> B["On-Device Inspector (yt-dlp JSON)"]
+    B --> C{"Format Selection"}
+    C -->|"Default"| D["Best Available Stream"]
+    C -->|"Custom Options"| E["Resolution Cap or Direct Audio Copy"]
+    C -->|"Playlist URL"| F["Multi-Item Item Picker"]
+    D --> G["Room Database Queue"]
+    E --> G
+    F --> G
+    G --> H["Android 14+ UIDT Worker (2 Concurrent Jobs)"]
+    H --> I["Local yt-dlp & FFmpeg Engine"]
+    I --> J["Private App Staging (noBackupFilesDir)"]
+    J --> K["MediaStore Publication (Movies/Orca & Music/Orca)"]
+    K --> L["Built-in Player & System Media Apps"]
 ```
 
-The Gradle wrapper is pinned to 8.11.1 with a SHA-256 checksum. Maven dependencies require network access on first build. The app produces separate ARM64 and x86_64 APKs in `app/build/outputs/apk/`. HTTP is permitted for direct media sources; prefer HTTPS links.
+1. **Inspection:** A shared or pasted URL is inspected using `yt-dlp --dump-single-json` to query available formats, streams, and playlist entries without downloading media.
+2. **Transfer Queue:** Requests are stored in a local SQLite Room database. Two concurrent User-Initiated Transfer jobs drain the queue under foreground service notifications.
+3. **Stream Assembly:** Video streams merge using FFmpeg if separate DASH feeds are retrieved. Audio extraction copies the original encoded stream directly into an optimal container.
+4. **Publication:** Completed files stage in private app storage before being atomically inserted into Android's public `MediaStore` (`Movies/Orca` or `Music/Orca`). If a file with the same title already exists, a deterministic request suffix prevents accidental overwrites.
 
-The build patches five WebP libraries in the FFmpeg runtime to support 16 KB memory pages. This is automatic and leaves the original Maven artifacts unchanged. See [native dependency provenance](vendor/webp/README.md).
+## Installation
 
-## Personal signing
+### Prerequisites
 
-The personal signing key must stay outside this repository. Create an RSA key with `keytool`, then put its configuration in the ignored `signing.properties`:
+- An Android device or emulator running **Android 14 (API level 34)** or higher.
+- Architectures supported: `ARM64` (most modern phones) and `x86_64` (emulators and Chromebooks).
+
+### Download prebuilt APKs
+
+Official signed release builds are published under [GitHub Releases](https://github.com/projectGloria/Orca/releases):
+
+1. Download `Orca-<version>-arm64.apk` for your physical phone (or `x86_64` for emulators).
+2. Sideload the APK onto your device or run:
+   ```bash
+   adb install -r Orca-0.1.1-arm64.apk
+   ```
+3. Grant the required notification permission on initial launch so transfer progress can display.
+
+## Usage
+
+### 1. Download best available quality
+
+1. Copy any supported media URL to your clipboard.
+2. Open Orca and tap **Paste** (or share a link directly to Orca from any web browser or media app).
+3. Tap **Download**. Orca automatically fetches the highest quality video and audio streams available.
+
+### 2. Extract audio without quality loss
+
+1. Paste or share the link.
+2. Tap **Options** before downloading (or enable *Ask before downloading* in Settings).
+3. Select **Audio** and tap **Download**. Orca copies the native audio stream directly using FFmpeg without transcoding.
+
+### 3. Batch download playlists
+
+1. Paste a playlist URL (e.g., `https://www.youtube.com/playlist?list=...`).
+2. The playlist picker will open automatically, inspecting all entries and highlighting unavailable or private items.
+3. Select the items you want to keep, choose your target format, and tap **Download selected items**.
+
+## Building from source
+
+### Prerequisites
+
+- **JDK 17** (e.g. Eclipse Temurin 17 or OpenJDK 17). Ensure `JAVA_HOME` is set.
+- **Android SDK Platform 35** with **Build-Tools 35.0.0**. Ensure `ANDROID_HOME` is set.
+- **Gradle 8.11.1** (enforced by the checked-in wrapper with SHA-256 validation).
+
+### Step-by-step build
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/projectGloria/Orca.git
+   cd Orca
+   ```
+
+2. **Run test suite and assemble debug builds:**
+   - On Windows (PowerShell):
+     ```powershell
+     .\gradlew.bat testDebugUnitTest lintDebug assembleDebug
+     ```
+   - On Linux / macOS:
+     ```bash
+     ./gradlew testDebugUnitTest lintDebug assembleDebug
+     ```
+
+3. **Locate built APKs:**
+   Debug APKs are generated under:
+   ```text
+   app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+   app/build/outputs/apk/debug/app-x86_64-debug.apk
+   ```
+
+### 16 KB page patching details
+
+Orca automatically patches the five WebP dynamic libraries within the `youtubedl-android` FFmpeg runtime during build, replacing 4 KB ELF segments with ABI-compatible 16 KB aligned Termux binaries. See [vendor/webp/README.md](vendor/webp/README.md) for package checksums and native dependency provenance.
+
+## Configuration and updates
+
+<details>
+<summary><strong>Personal signing configuration</strong></summary>
+
+To build signed release APKs, create an RSA signing key using `keytool` and define its location in `signing.properties` (this file is excluded from Git):
 
 ```properties
 storeFile=C:/Users/you/.android/orca/orca-personal.jks
-storePassword=YOUR_PASSWORD
+storePassword=YOUR_KEYSTORE_PASSWORD
 keyAlias=orca
-keyPassword=YOUR_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
 ```
 
-Run `./gradlew assembleRelease`. Keep the key and passwords safe: future updates must use the same key. No signing credentials are committed. Install the ARM64 release APK on a phone with `adb install -r PATH_TO_APK`; x86_64 builds target emulators.
+Then assemble the release build:
+```bash
+./gradlew assembleRelease
+```
+</details>
 
-## Automatic builds and GitHub releases
+<details>
+<summary><strong>In-app update checks</strong></summary>
 
-GitHub Actions builds and tests every push to `main`/`master` and every pull request. Debug APKs and test/lint reports are attached to the workflow run. Debug APKs use a different certificate; use the signed APKs on the **Releases** page for your phone.
+Navigate to **Home &rarr; Settings &rarr; App updates &rarr; Check for updates**:
+- Orca queries the official [projectGloria/Orca Releases API](https://github.com/projectGloria/Orca/releases) directly.
+- Compares Android version codes and presents the matching ABI APK link.
+- Never downloads or installs updates silently; tapping **Download update** directs you to the official GitHub APK release download.
 
-To ship an update, increase **both** values in `version.properties` (`versionName` is stable `x.y.z`; `versionCode` must always increase), commit and push to `main`. The release workflow tests and builds both signed architectures, checks signatures and native alignment, creates `v<versionName>`, and publishes a GitHub release automatically. Pushing the matching `v*` tag, publishing a GitHub release for that tag, or manually running **Signed release** also works. The tag's source must contain the matching version file. Already completed releases are never overwritten; corrections need a new version.
+Engine updates for the embedded `yt-dlp` executable are handled separately under **Download engine &rarr; Check for engine update**. Orca maintains an atomic engine backup to automatically roll back if an update is interrupted or corrupt.
+</details>
 
-The repository needs these encrypted **Actions secrets**, using the same key as the installed personal APK:
+<details>
+<summary><strong>Continuous Integration & GitHub Releases</strong></summary>
 
-| Secret | Value |
-| --- | --- |
-| `ORCA_KEYSTORE_BASE64` | Base64 contents of the personal `.jks` signing key |
-| `ORCA_STORE_PASSWORD` | Keystore password |
-| `ORCA_KEY_ALIAS` | Signing alias (`orca` for the original personal key) |
-| `ORCA_KEY_PASSWORD` | Key password |
+GitHub Actions runs automated build, lint, and unit test suites on all pushes and pull requests (`ci.yml`). Signed release deployment (`release.yml`) executes when incrementing `versionCode` and `versionName` in [version.properties](version.properties), publishing signed artifacts, SHA-256 checksums, and update manifests to GitHub Releases.
+</details>
 
-Signing is restricted to the release workflow; pull requests never receive signing secrets. Missing secrets stop a release rather than publishing a differently signed APK. The workflow removes temporary signing files before uploading artifacts. Keep the original local key backup as well as the encrypted GitHub secrets.
+## Contributing
 
-Release assets are `Orca-<version>-arm64.apk`, `Orca-<version>-x86_64.apk`, `SHA256SUMS.txt`, and `orca-update.json`. The update manifest is uploaded last, so the app cannot offer a partially uploaded release. `scripts/release.py` generates the manifest and hashes from the same version file used by Android's `BuildConfig`.
+Contributions, bug reports, and feature requests are welcome!
 
-## Check for app updates
+1. Fork the repository and create a feature branch (`git checkout -b feature/my-feature`).
+2. Verify all local tests pass before opening a PR:
+   ```bash
+   ./gradlew testDebugUnitTest lintDebug
+   ```
+3. Commit your changes and submit a pull request. PRs are tested automatically against the CI workflow.
 
-Open **Home → Settings → App updates → Check for updates**. Orca checks the latest stable public release of [projectGloria/Orca](https://github.com/projectGloria/Orca/releases), compares Android version codes, and selects the APK matching the device's architecture. Draft and prerelease builds are excluded, and older versions are never offered as updates.
+## License and notices
 
-When an update is available, **Download update** opens its official GitHub APK link in your browser. Open the downloaded APK and approve Android's installation prompt. Existing downloads and settings are retained when the signing key matches. Orca never silently downloads or installs an application update. **Check for engine update** remains a separate action for yt-dlp.
+Orca is developed as an open-source personal project. It incorporates and depends on the following upstream components:
 
-## Behavior
+| Component | License | Notice / Upstream Link |
+| --- | --- | --- |
+| **youtubedl-android** | MIT | [yausername/youtubedl-android](https://github.com/yausername/youtubedl-android/tree/0.18.1) |
+| **yt-dlp** | The Unlicense | [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) |
+| **FFmpeg 7.1.1** | GPL v3 | [ffmpeg.org](https://ffmpeg.org/) (bundled with x264/x265) |
+| **Python** | PSF License | [python.org](https://docs.python.org/3/license.html) |
+| **QuickJS** | MIT | [bellard/quickjs](https://github.com/bellard/quickjs) |
+| **WebP / libsharpyuv** | BSD-3-Clause | [webmproject/libwebp](https://github.com/webmproject/libwebp) (16 KB aligned) |
+| **AndroidX & Jetpack** | Apache 2.0 | [Android Open Source Project](https://android.googlesource.com/platform/frameworks/support/) |
+| **Kotlin & Coroutines** | Apache 2.0 | [JetBrains/kotlin](https://github.com/JetBrains/kotlin) |
+| **Coil** | Apache 2.0 | [coil-kt/coil](https://github.com/coil-kt/coil) |
 
-Paste or share a public link. Shared links fill the field and never download automatically. Download starts best available video by default. Options applies to one request; Settings can enable the configuration sheet for every request. Playlist-only URLs always open a picker. A YouTube watch URL with playlist context downloads the video unless you choose the separate playlist action.
+For complete component details, patent grants, and third-party notices, refer to [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Best video uses `bestvideo*+bestaudio/best` with no cap or re-encoding, including combined streams when they offer the best video. Resolution choices cap stream height, including portrait formats, with the engine choosing streams within that cap. Audio uses `bestaudio/best` and forces FFmpeg audio stream copying, including when yt-dlp would otherwise choose an encoding fallback. An incompatible audio/container combination fails instead of silently transcoding. Source quality takes priority over device playback compatibility.
-
-Two Android user-initiated transfer jobs drain a persisted queue. Jobs require a user action while the app is visible and display notifications. Temporary streams and partial files live in private app storage. On restart, unfinished requests become interrupted and require an explicit Resume. Resume re-extracts media URLs and lets yt-dlp resume compatible partial streams. A source that changes its streams may require a fresh transfer.
-
-Completed files publish through MediaStore into Movies/Orca or Music/Orca. A unique request suffix prevents filename collisions. Publication records its URI and staging file before copying; retry reuses the staging file and deterministic MediaStore name. Files remain available after uninstall. Private staging files do not.
-
-Library entries can play, share, open the source, retry or be deleted with confirmation. External media apps receive temporary read permission. Missing files produce a short actionable message. Manual engine updates are restricted to idle transfers/inspections and retain a recovery backup of the working engine.
-
-## Validation
-
-See [VALIDATION.md](VALIDATION.md) for actual checks and limitations. Public-source compatibility depends on yt-dlp extractors, source availability, network location and source restrictions. An implemented extractor is not evidence that a platform works on a particular network.
-
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for upstream components and licenses.
+For test suites, emulator logs, and live source probe records, see [VALIDATION.md](VALIDATION.md).

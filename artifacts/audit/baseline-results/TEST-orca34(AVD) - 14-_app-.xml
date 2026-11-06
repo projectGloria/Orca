@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="io.github.nihil.orca.AppUpdatesLiveTest" tests="19" failures="0" errors="0" skipped="3" time="109.363" timestamp="2026-11-02T15:15:21" hostname="localhost">
+  <properties>
+    <property name="device" value="orca34(AVD) - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="officialReleaseSupportsCurrentAndOlderInstalls" classname="io.github.nihil.orca.AppUpdatesLiveTest" time="4.032">
+    <skipped />
+  </testcase>
+  <testcase name="availableUpdateCanBeDismissedWithoutDownloading" classname="io.github.nihil.orca.AppUpdatesUiTest" time="3.831" />
+  <testcase name="settingsHasSeparateAppUpdateAction" classname="io.github.nihil.orca.AppUpdatesUiTest" time="2.884" />
+  <testcase name="bundledRuntimeMergesSeparateStreamsAndPublishes" classname="io.github.nihil.orca.EngineSmokeTest" time="7.782" />
+  <testcase name="bundledJavaScriptRuntimeRuns" classname="io.github.nihil.orca.EngineSmokeTest" time="2.554" />
+  <testcase name="extractsOriginalAudioWithoutVideo" classname="io.github.nihil.orca.EngineSmokeTest" time="4.914" />
+  <testcase name="singleItemAudioOverrideKeepsBestSourceQuality" classname="io.github.nihil.orca.OptionsUiTest" time="5.905" />
+  <testcase name="playlistCountAndUnavailableEntriesMatchSelection" classname="io.github.nihil.orca.OptionsUiTest" time="4.805" />
+  <testcase name="homeLibraryAndSettingsAreReachable" classname="io.github.nihil.orca.OrcaUiTest" time="3.852" />
+  <testcase name="genericPlaylistAlwaysOpensPickerBeforeQueueing" classname="io.github.nihil.orca.OrcaUiTest" time="19.552" />
+  <testcase name="queuedTransferCompletesWithScreenLocked" classname="io.github.nihil.orca.OrcaUiTest" time="12.194" />
+  <testcase name="receivingSharedTextOnlyFillsTheLink" classname="io.github.nihil.orca.OrcaUiTest" time="2.625" />
+  <testcase name="savedAskPreferenceOpensOptionsWithoutStartingTransfer" classname="io.github.nihil.orca.OrcaUiTest" time="9.237" />
+  <testcase name="cancelledItemResumesIndependently" classname="io.github.nihil.orca.OrcaUiTest" time="8.658" />
+  <testcase name="recoverPersistedTransferAfterForceStop" classname="io.github.nihil.orca.ProcessRecoveryTest" time="0.131">
+    <skipped />
+  </testcase>
+  <testcase name="restartRequiresResumeAndRetainsPublicationReceipt" classname="io.github.nihil.orca.RecoveryTest" time="0.134" />
+  <testcase name="optionsRemainScrollableWithLargeText" classname="io.github.nihil.orca.RedesignUiTest" time="3.506" />
+  <testcase name="collectionFiltersAndBackNavigationKeepTheirContext" classname="io.github.nihil.orca.RedesignUiTest" time="8.216" />
+  <testcase name="recordLiveSources" classname="io.github.nihil.orca.SourceProbeTest" time="1.925">
+    <skipped />
+  </testcase>
+</testsuite>

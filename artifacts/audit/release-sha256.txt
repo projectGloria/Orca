@@ -1,0 +1,9 @@
+
+Algorithm : SHA256
+Hash      : BD45ABA8A29C0FC52DB57EF227C7CB36A194C0F34EEF81FFB2FCDF0DC62EBD37
+Path      : C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build\outputs\apk\release\app-arm64-v8a-release.apk
+
+Algorithm : SHA256
+Hash      : 77523129690E93569BAAA85A5451D6B4785CC0A4444D66D1A501BC29F240C164
+Path      : C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build\outputs\apk\release\app-x86_64-release.apk
+

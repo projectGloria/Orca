@@ -1,0 +1,152 @@
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:12: Warning: A newer version of org.apache.commons:commons-compress than 1.26.1 is available: 1.27.1 [GradleDependency]
+    dependencies { classpath("org.apache.commons:commons-compress:1.26.1") }
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:83: Warning: A newer version of androidx.compose:compose-bom than 2025.04.01 is available: 2026.09.00 [GradleDependency]
+    implementation(platform("androidx.compose:compose-bom:2025.04.01"))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:84: Warning: A newer version of androidx.activity:activity-compose than 1.10.1 is available: 1.13.0 [GradleDependency]
+    implementation("androidx.activity:activity-compose:1.10.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:87: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.9.0 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:88: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.9.0 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:89: Warning: A newer version of androidx.room:room-runtime than 2.7.1 is available: 2.8.5 [GradleDependency]
+    implementation("androidx.room:room-runtime:2.7.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:90: Warning: A newer version of androidx.room:room-ktx than 2.7.1 is available: 2.8.5 [GradleDependency]
+    implementation("androidx.room:room-ktx:2.7.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:91: Warning: A newer version of androidx.room:room-compiler than 2.7.1 is available: 2.8.5 [GradleDependency]
+    ksp("androidx.room:room-compiler:2.7.1")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:92: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.4 is available: 1.3.0 [GradleDependency]
+    implementation("androidx.datastore:datastore-preferences:1.1.4")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:93: Warning: A newer version of androidx.media3:media3-exoplayer than 1.6.1 is available: 1.11.1 [GradleDependency]
+    implementation("androidx.media3:media3-exoplayer:1.6.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:94: Warning: A newer version of androidx.media3:media3-ui than 1.6.1 is available: 1.11.1 [GradleDependency]
+    implementation("androidx.media3:media3-ui:1.6.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:102: Warning: A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0 [GradleDependency]
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:103: Warning: A newer version of androidx.test:runner than 1.6.2 is available: 1.7.0 [GradleDependency]
+    androidTestImplementation("androidx.test:runner:1.6.2")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:104: Warning: A newer version of androidx.test:rules than 1.6.1 is available: 1.7.0 [GradleDependency]
+    androidTestImplementation("androidx.test:rules:1.6.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\build.gradle.kts:105: Warning: A newer version of androidx.compose:compose-bom than 2025.04.01 is available: 2026.09.00 [GradleDependency]
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.04.01"))
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\AndroidManifest.xml:6: Warning: The attribute android:allowBackup is deprecated from Android 12 and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures backups and device transfers on Android 12 and higher. [DataExtractionRules]
+    <application android:name=".OrcaApplication" android:label="Orca" android:icon="@drawable/ic_orca" android:theme="@style/Theme.Orca" android:allowBackup="false" android:extractNativeLibs="true" android:supportsRtl="true" android:usesCleartextTraffic="true">
+                                                                                                                                                              ~~~~~
+
+   Explanation for issues of type "DataExtractionRules":
+   Before Android 12, the attributes android:allowBackup and
+   android:fullBackupContent were used to configure all forms of backup,
+   including cloud backups, device-to-device transfers and adb backup.
+
+   In Android 12 and higher, these attributes have been deprecated and will
+   only apply to cloud backups. You should instead use the attribute
+   android:dataExtractionRules, specifying an @xml resource that configures
+   which files to back up, for cloud backups and for device-to-device
+   transfers, separately. If your minSdkVersion supports older versions,
+   you'll still want to specify an android:fullBackupContent resource if the
+   default behavior is not right for your app.
+
+   https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   https://goo.gle/DataExtractionRules
+
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\MainActivity.kt:204: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(release.downloadUrl))) }.onFailure { model.appUpdateStatus.value = "No browser is available to download the update." }
+                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\MainActivity.kt:426: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val uri = Uri.parse(item.uri)
+              ~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\MainActivity.kt:430: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(item.uri), item.mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), "Open media")) }.onFailure { model.message.value = "Install a player that supports this media format." }
+                                                                                                       ~~~~~~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\MainActivity.kt:432: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+private fun openLink(context: android.content.Context, url: String) { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }
+                                                                                                                                     ~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\Storage.kt:49: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    fun exists(uri: String): Boolean = runCatching { resolver.openFileDescriptor(Uri.parse(uri), "r")?.use { true } ?: false }.getOrDefault(false)
+                                                                                 ~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\Storage.kt:69: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        resolver.openOutputStream(Uri.parse(uri), "wt").use { output -> requireNotNull(output); file.inputStream().use { it.copyTo(output) } }
+                                  ~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\Storage.kt:70: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        check(resolver.update(Uri.parse(uri), ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) == 1) { "Could not publish the file. Retry to finish saving." }
+                              ~~~~~~~~~~~~~~
+C:\Users\Nihil\Desktop\Gloria Repoz\Orca\app\src\main\java\io\github\nihil\orca\Storage.kt:72: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    fun delete(uri: String) { if (uri.isNotBlank()) resolver.delete(Uri.parse(uri), null, null) }
+                                                                    ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 24 warnings

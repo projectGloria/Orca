@@ -31,28 +31,30 @@ class DownloadRepository(val context: Context, val dao: DownloadsDao, val engine
     private val gate = Mutex()
     private var operations = 0
     private val inFlight = mutableSetOf<String>()
+    private val transfers = mutableMapOf<String, Job>()
     private var updating = false
     private val ready = scope.async { dao.reconcile() }
     private suspend fun <T> operation(block: suspend () -> T): T {
         gate.withLock { check(!updating) { "Engine update in progress. Try again shortly." }; operations++ }
-        return try { block() } finally { gate.withLock { operations-- } }
+        return try { block() } finally { withContext(NonCancellable) { gate.withLock { operations-- } } }
     }
     suspend fun inspect(url: String) = operation { engine.inspect(url) }
     suspend fun playlist(url: String) = operation { engine.playlist(url) }
+    suspend fun version() = operation { engine.version() }
     suspend fun update(): String {
         ready.await()
         gate.withLock {
-            check(!updating && operations == 0 && dao.all().none { it.state in activeStates }) { "Wait until downloads and inspections finish." }
+            check(!updating && operations == 0 && !dao.hasActive()) { "Wait until downloads and inspections finish." }
             updating = true
         }
-        return try { engine.update() } finally { gate.withLock { updating = false } }
+        return try { engine.update() } finally { withContext(NonCancellable) { gate.withLock { updating = false } } }
     }
     suspend fun enqueue(media: List<MediaInfo>, options: DownloadOptions) {
         ready.await()
         gate.withLock {
             check(!updating) { "Wait for the engine update to finish." }
             claim.withLock {
-                media.forEach { info -> dao.put(DownloadItem(url = info.url, title = info.title, thumbnail = info.thumbnail, duration = info.duration, audio = options.audio, height = options.height)) }
+                dao.putAll(media.map { info -> DownloadItem(url = info.url, title = info.title, thumbnail = info.thumbnail, duration = info.duration, audio = options.audio, height = options.height) })
                 schedule()
             }
         }
@@ -62,7 +64,9 @@ class DownloadRepository(val context: Context, val dao: DownloadsDao, val engine
         ready.await()
         gate.withLock { check(!updating) { "Wait for the engine update to finish." }; claim.withLock {
             check(item.id !in inFlight) { "Cancellation is finishing. Try Resume in a moment." }
-            dao.put(item.copy(state = "QUEUED", progress = -1f, error = "", details = "")); schedule()
+            val latest = dao.get(item.id) ?: return
+            if (latest.state in activeStates || latest.state == "COMPLETED") return
+            dao.put(latest.copy(state = "QUEUED", progress = -1f, error = "", details = "")); schedule()
         } }
     }
     private suspend fun schedule() {
@@ -85,15 +89,50 @@ class DownloadRepository(val context: Context, val dao: DownloadsDao, val engine
     }
     suspend fun next(): DownloadItem? = claim.withLock {
         ready.await()
-        dao.all().filter { it.state == "QUEUED" && it.id !in inFlight }.minByOrNull { it.created }?.copy(state = "PREPARING")?.also { dao.put(it); inFlight.add(it.id) }
+        dao.firstQueued()?.copy(state = "PREPARING")?.also { dao.put(it); inFlight.add(it.id) }
     }
     suspend fun finishIfEmpty(finish: () -> Unit): Boolean = claim.withLock {
-        if (dao.all().any { it.state == "QUEUED" }) false else { finish(); true }
+        if (dao.hasQueued()) false else { finish(); true }
     }
     private suspend fun saveActive(item: DownloadItem): Boolean = claim.withLock {
         if (dao.get(item.id)?.state !in activeStates) false else { dao.put(item); true }
     }
-    suspend fun run(item: DownloadItem, notify: (DownloadItem) -> Unit) = try { operation {
+    /** Claim and cleanup share one scope, including cancellation between acquisition and run. */
+    suspend fun processNext(notify: (DownloadItem) -> Unit): Boolean {
+        var item: DownloadItem? = null
+        try {
+            withContext(NonCancellable) { item = next() }
+            val claimed = item ?: return false
+            currentCoroutineContext().ensureActive()
+            executeTransfer(claimed, notify)
+            return true
+        } finally { item?.let { release(it.id) } }
+    }
+    private suspend fun release(id: String) = withContext(NonCancellable) {
+        claim.withLock {
+            dao.get(id)?.takeIf { it.state in activeStates }?.let {
+                dao.put(it.copy(state = "INTERRUPTED", error = "Interrupted. Tap Resume to continue."))
+            }
+            transfers.remove(id)
+            inFlight.remove(id)
+        }
+    }
+    suspend fun run(item: DownloadItem, notify: (DownloadItem) -> Unit) {
+        try { executeTransfer(item, notify) } finally { release(item.id) }
+    }
+    private suspend fun executeTransfer(item: DownloadItem, notify: (DownloadItem) -> Unit) = supervisorScope {
+        val worker = async(start = CoroutineStart.LAZY) { transfer(item, notify) }
+        try {
+            claim.withLock {
+                if (dao.get(item.id)?.state in activeStates) transfers[item.id] = worker else worker.cancel()
+            }
+            worker.await()
+        } catch (cancel: CancellationException) {
+            // A user's Cancel ends only this transfer. Android stopping the worker propagates.
+            currentCoroutineContext().ensureActive()
+        } finally { withContext(NonCancellable) { worker.cancelAndJoin() } }
+    }
+    private suspend fun transfer(item: DownloadItem, notify: (DownloadItem) -> Unit) = operation {
         var current = item
         try {
             val directory = File(context.filesDir, "staging/${item.id}").apply { mkdirs() }
@@ -107,14 +146,20 @@ class DownloadRepository(val context: Context, val dao: DownloadsDao, val engine
                 if (dao.get(item.id)?.state != "PREPARING") return@operation
                 if (!saveActive(current)) return@operation
                 notify(current)
+                currentCoroutineContext().ensureActive()
                 var last = 0L
+                val downloadContext = currentCoroutineContext()
                 output = engine.download(current, directory) { percent, line ->
                     val now = System.currentTimeMillis()
-                    if (now - last > 600 || percent >= 100) {
+                    if (downloadContext.isActive && (now - last > 600 || percent >= 100)) {
                         last = now
                         val state = if (line.contains("[Merger]") || line.contains("[ExtractAudio]")) "FINISHING" else "DOWNLOADING"
-                        runBlocking { dao.progress(item.id, state, percent) }
-                        notify(current.copy(state = state, progress = percent))
+                        runBlocking { claim.withLock {
+                            if (downloadContext.isActive) {
+                                dao.progress(item.id, state, percent)
+                                notify(current.copy(state = state, progress = percent))
+                            }
+                        } }
                     }
                 }
             }
@@ -125,23 +170,36 @@ class DownloadRepository(val context: Context, val dao: DownloadsDao, val engine
             val (uri, mime) = publisher.create(current, output)
             current = current.copy(uri = uri, mime = mime)
             if (!saveActive(current)) return@operation
-            publisher.publish(uri, output)
-            current = current.copy(state = "COMPLETED", progress = 100f, staging = "")
-            if (saveActive(current)) { directory.deleteRecursively(); notify(current) }
+            val transferContext = currentCoroutineContext()
+            publisher.copyPending(uri, output) { transferContext.ensureActive() }
+            // Cancellation and the final publication decision are serialized. Once this wins,
+            // persist completion even if the worker is stopped during the provider/Room commits.
+            withContext(NonCancellable) { claim.withLock {
+                if (transferContext.isActive && dao.get(item.id)?.state in activeStates) {
+                    publisher.complete(uri)
+                    current = current.copy(state = "COMPLETED", progress = 100f, staging = "")
+                    dao.put(current)
+                    directory.deleteRecursively()
+                    notify(current)
+                }
+            } }
         } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) {
             if (dao.get(item.id)?.state !in setOf("CANCELLED", "INTERRUPTED")) {
-                current = current.copy(state = "FAILED", error = friendlyError(error), details = error.stackTraceToString())
+                current = current.copy(state = "FAILED", error = friendlyError(error), details = error.stackTraceToString().take(32768))
                 if (saveActive(current)) notify(current)
             }
         }
-    } } finally { withContext(NonCancellable) { claim.withLock { inFlight.remove(item.id) } } }
+    }
     suspend fun cancel(id: String, interrupted: Boolean = false) {
         claim.withLock {
             val item = dao.get(id) ?: return
             if (item.state == "COMPLETED") return
             dao.put(item.copy(state = if (interrupted) "INTERRUPTED" else "CANCELLED", error = if (interrupted) "Interrupted. Tap Resume to continue." else "Cancelled. Tap Resume to continue."))
-            engine.cancel(id)
+            transfers[id]?.cancel()
+            // Keep the reservation until the best-effort native stop finishes, so a Resume
+            // cannot reuse this process ID while cancellation still targets the old attempt.
+            withContext(Dispatchers.IO) { runCatching { engine.cancel(id) } }
         }
     }
     suspend fun delete(item: DownloadItem) = claim.withLock {
@@ -176,22 +234,21 @@ fun friendlyError(error: Throwable): String {
 class TransferService : JobService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val workers = mutableMapOf<Int, Job>()
-    private val current = java.util.concurrent.ConcurrentHashMap<Int, String>()
     override fun onStartJob(params: JobParameters): Boolean {
         setNotification(params, params.jobId, notification(null, params.jobId), JOB_END_NOTIFICATION_POLICY_REMOVE)
         workers[params.jobId] = scope.launch {
+            val workerJob = currentCoroutineContext().job
             try {
                 while (isActive) {
-                    val item = repository.next()
-                    if (item == null) {
+                    val processed = repository.processNext { value -> getSystemService(NotificationManager::class.java).notify(params.jobId, notification(value, params.jobId)) }
+                    if (!processed) {
                         if (repository.finishIfEmpty { jobFinished(params, false) }) break
                         continue
                     }
-                    current[params.jobId] = item.id
-                    repository.run(item) { value -> getSystemService(NotificationManager::class.java).notify(params.jobId, notification(value, params.jobId)) }
-                    current.remove(params.jobId)
                 }
-            } finally { withContext(NonCancellable + Dispatchers.Main) { workers.remove(params.jobId) } }
+            } finally { withContext(NonCancellable + Dispatchers.Main) {
+                if (workers[params.jobId] == workerJob) workers.remove(params.jobId)
+            } }
         }
         return true
     }
@@ -208,12 +265,8 @@ class TransferService : JobService() {
         return builder.build()
     }
     override fun onStopJob(params: JobParameters): Boolean {
-        current.remove(params.jobId)?.let { id ->
-            // Record interruption before cancelling the coroutine; preserve the partial files.
-            runBlocking(Dispatchers.IO) { repository.cancel(id, interrupted = true) }
-        }
-        runBlocking(Dispatchers.IO) { repository.dao.interruptQueued() }
         workers.remove(params.jobId)?.cancel()
+        (application as OrcaApplication).scope.launch { repository.dao.interruptQueued() }
         return false
     }
     override fun onDestroy() { scope.cancel(); super.onDestroy() }

@@ -30,6 +30,10 @@ interface DownloadsDao {
     @Query("SELECT * FROM downloads WHERE id = :id") suspend fun get(id: String): DownloadItem?
     @Query("SELECT * FROM downloads") suspend fun all(): List<DownloadItem>
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun put(item: DownloadItem)
+    @Insert suspend fun putAll(items: List<DownloadItem>)
+    @Query("SELECT * FROM downloads WHERE state = 'QUEUED' ORDER BY created ASC LIMIT 1") suspend fun firstQueued(): DownloadItem?
+    @Query("SELECT EXISTS(SELECT 1 FROM downloads WHERE state = 'QUEUED')") suspend fun hasQueued(): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM downloads WHERE state IN ('QUEUED','PREPARING','DOWNLOADING','FINISHING'))") suspend fun hasActive(): Boolean
     @Query("UPDATE downloads SET state = :state, progress = :progress WHERE id = :id AND state NOT IN ('CANCELLED','INTERRUPTED')") suspend fun progress(id: String, state: String, progress: Float)
     @Query("UPDATE downloads SET state = 'INTERRUPTED', error = 'Interrupted. Tap Resume to continue.' WHERE state IN ('QUEUED','PREPARING','DOWNLOADING','FINISHING')") suspend fun reconcile()
     @Query("UPDATE downloads SET state = 'INTERRUPTED', error = 'Android stopped the queue. Tap Resume to continue.' WHERE state = 'QUEUED'") suspend fun interruptQueued()
@@ -66,7 +70,27 @@ class MediaPublisher(private val context: Context) {
         return (existing ?: requireNotNull(resolver.insert(collection, values))).toString() to mime
     }
     fun publish(uri: String, file: File) {
-        resolver.openOutputStream(Uri.parse(uri), "wt").use { output -> requireNotNull(output); file.inputStream().use { it.copyTo(output) } }
+        copyPending(uri, file)
+        complete(uri)
+    }
+    fun copyPending(uri: String, file: File, checkActive: () -> Unit = {}) {
+        checkActive()
+        check(resolver.update(Uri.parse(uri), ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 1) }, null, null) == 1)
+        resolver.openOutputStream(Uri.parse(uri), "wt").use { output ->
+            requireNotNull(output)
+            file.inputStream().use { input ->
+                val buffer = ByteArray(64 * 1024)
+                while (true) {
+                    checkActive()
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    output.write(buffer, 0, count)
+                }
+            }
+        }
+        checkActive()
+    }
+    fun complete(uri: String) {
         check(resolver.update(Uri.parse(uri), ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) == 1) { "Could not publish the file. Retry to finish saving." }
     }
     fun delete(uri: String) { if (uri.isNotBlank()) resolver.delete(Uri.parse(uri), null, null) }

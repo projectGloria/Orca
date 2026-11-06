@@ -1,0 +1,1 @@
+C:\Users\Nihil\AppData\Local\Android\Sdk\emulator\qemu\windows-x86_64\qemu-system-x86_64-headless.exe: virtio: zero sized buffers are not allowed

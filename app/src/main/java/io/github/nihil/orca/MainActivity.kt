@@ -18,6 +18,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.saveable.listSaver
 import io.github.nihil.orca.ui.*
 import io.github.nihil.orca.ui.components.*
 import androidx.compose.foundation.clickable
@@ -46,6 +48,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -86,7 +91,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class OptionsState(val media: List<MediaInfo>, val playlist: Boolean)
+data class OptionsState(val media: List<MediaInfo>, val playlist: Boolean, val id: String = java.util.UUID.randomUUID().toString())
 class OrcaModel(application: Application) : AndroidViewModel(application) {
     val repo = application.repository
     val link = MutableStateFlow("")
@@ -94,14 +99,19 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
     val message = MutableStateFlow<String?>(null)
     val details = MutableStateFlow("")
     val options = MutableStateFlow<OptionsState?>(null)
+    val submitting = MutableStateFlow(false)
     val engineVersion = MutableStateFlow("Checking…")
     val checkingAppUpdate = MutableStateFlow(false)
     val appUpdateStatus = MutableStateFlow("")
     val availableAppRelease = MutableStateFlow<AppRelease?>(null)
     val items = repo.items.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val ask = repo.preferences.ask.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    init { viewModelScope.launch { engineVersion.value = runCatching { repo.engine.version() }.getOrElse { "Unavailable" } } }
-    fun action(block: suspend () -> Unit) { viewModelScope.launch { try { block() } catch (e: Exception) { message.value = friendlyError(e); details.value = e.stackTraceToString() } } }
+    init { viewModelScope.launch {
+        try { engineVersion.value = repo.version() }
+        catch (cancel: CancellationException) { throw cancel }
+        catch (_: Exception) { engineVersion.value = "Unavailable" }
+    } }
+    fun action(block: suspend () -> Unit) { viewModelScope.launch { try { block() } catch (cancel: CancellationException) { throw cancel } catch (e: Exception) { message.value = friendlyError(e); details.value = e.stackTraceToString().take(32768) } } }
     fun start(configure: Boolean = false, playlist: Boolean = false) {
         if (busy.value) return
         val url = LinkParser.fromText(link.value)
@@ -119,7 +129,10 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
             } finally { busy.value = false }
         }
     }
-    fun enqueue(media: List<MediaInfo>, selection: DownloadOptions) { action { repo.enqueue(media, selection); options.value = null } }
+    fun enqueue(media: List<MediaInfo>, selection: DownloadOptions) {
+        if (!submitting.compareAndSet(false, true)) return
+        action { try { repo.enqueue(media, selection); options.value = null } finally { submitting.value = false } }
+    }
     fun update() {
         if (busy.value) return
         busy.value = true
@@ -158,6 +171,7 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
     val busy by model.busy.collectAsStateWithLifecycle()
     val ask by model.ask.collectAsStateWithLifecycle()
     val options by model.options.collectAsStateWithLifecycle()
+    val submitting by model.submitting.collectAsStateWithLifecycle()
     val message by model.message.collectAsStateWithLifecycle()
     val details by model.details.collectAsStateWithLifecycle()
     val version by model.engineVersion.collectAsStateWithLifecycle()
@@ -169,6 +183,7 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
     var playing by remember { mutableStateOf<DownloadItem?>(null) }
     var deleting by remember { mutableStateOf<DownloadItem?>(null) }
     var errorItem by remember { mutableStateOf<DownloadItem?>(null) }
+    val screenState = rememberSaveableStateHolder()
     val context = LocalContext.current
     fun play(item: DownloadItem) {
         if (model.repo.publisher.exists(item.uri)) playing = item else { model.message.value = "File is missing. Download it again from the original link."; model.details.value = "" }
@@ -180,6 +195,7 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
             val screenModifier = Modifier.widthIn(max = OrcaLayout.contentMaxWidth).fillMaxSize()
+            screenState.SaveableStateProvider(if (settings) "settings" else "destination-$destination") {
             if (settings) SettingsScreen(screenModifier, ask, version, busy || items.any { it.state in DownloadRepository.activeStates }, { value -> model.action { model.repo.preferences.setAsk(value) } }, model::update, checkingAppUpdate, appUpdateStatus, model::checkAppUpdate)
             else if (destination == 0) LazyColumn(screenModifier, contentPadding = PaddingValues(OrcaLayout.pageInset), verticalArrangement = Arrangement.spacedBy(OrcaLayout.homeItemGap)) {
                 item { HomeHero() }
@@ -193,9 +209,10 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
                 items(transfers, key = { it.id }) { item -> DownloadCard(item, onPlay = { play(item) }, onShare = { share(context, item, model) }, onCancel = { model.action { model.repo.cancel(item.id) } }, onResume = { model.action { model.repo.resume(item) } }, onDelete = { deleting = item }, onError = { errorItem = item }, onLink = { openLink(context, item.url) }) }
             }
             else LibraryScreen(screenModifier, items, { play(it) }, { share(context, it, model) }, { model.action { model.repo.cancel(it.id) } }, { model.action { model.repo.resume(it) } }, { deleting = it }, { errorItem = it }, { openLink(context, it.url) })
+            }
         }
     }
-    options?.let { data -> OptionsSheet(data, { model.options.value = null }, model::enqueue) }
+    options?.let { data -> OptionsSheet(data, { if (!submitting) model.options.value = null }, model::enqueue, submitting) }
     appRelease?.let { release ->
         AlertDialog(onDismissRequest = { model.availableAppRelease.value = null }, title = { Text("Orca ${release.versionName} is available") },
             text = { Column { Text("Installed: ${BuildConfig.VERSION_NAME}. Download the update from GitHub, then open the APK to install it. Android will ask you to approve the installation."); TextButton(onClick = { openLink(context, release.pageUrl) }) { Text("Release notes") } } },
@@ -287,10 +304,10 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable internal fun OptionsSheet(state: OptionsState, dismiss: () -> Unit, download: (List<MediaInfo>, DownloadOptions) -> Unit) {
-    var audio by remember { mutableStateOf(false) }
-    var height by remember { mutableIntStateOf(0) }
-    var selected by remember { mutableStateOf(state.media.indices.filter { state.media[it].available }.toSet()) }
+@Composable internal fun OptionsSheet(state: OptionsState, dismiss: () -> Unit, download: (List<MediaInfo>, DownloadOptions) -> Unit, submitting: Boolean = false) {
+    var audio by rememberSaveable(state.id) { mutableStateOf(false) }
+    var height by rememberSaveable(state.id) { mutableIntStateOf(0) }
+    var selected by rememberSaveable(state.id, stateSaver = listSaver<Set<Int>, Int>(save = { it.toList() }, restore = { it.toSet() })) { mutableStateOf(state.media.indices.filter { state.media[it].available }.toSet()) }
     val first = state.media.firstOrNull()
     ModalBottomSheet(onDismissRequest = dismiss, containerColor = MaterialTheme.colorScheme.surface, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.fillMaxWidth().padding(horizontal = OrcaLayout.sheetInset).padding(bottom = OrcaLayout.sheetInset), verticalArrangement = Arrangement.spacedBy(OptionsSheetMetrics.contentGap)) {
@@ -333,7 +350,7 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
                 } }
             }
             }
-            OrcaPrimaryButton(text = if (state.playlist) "Download ${selected.size} ${if (selected.size == 1) "item" else "items"}" else "Download", onClick = { download(state.media.filterIndexed { index, _ -> index in selected }, DownloadOptions(audio, height)) }, enabled = selected.isNotEmpty(), modifier = Modifier.testTag("confirmDownload"))
+            OrcaPrimaryButton(text = if (submitting) "Adding downloads…" else if (state.playlist) "Download ${selected.size} ${if (selected.size == 1) "item" else "items"}" else "Download", onClick = { download(state.media.filterIndexed { index, _ -> index in selected }, DownloadOptions(audio, height)) }, enabled = selected.isNotEmpty() && !submitting, modifier = Modifier.testTag("confirmDownload"))
         }
     }
 }
@@ -395,11 +412,25 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
     val context = LocalContext.current
     var fullscreen by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
-    val player = remember(item.uri) { ExoPlayer.Builder(context).build().apply { setMediaItem(MediaItem.fromUri(item.uri)); prepare(); playWhenReady = true } }
-    DisposableEffect(player) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val player = remember(item.uri) { ExoPlayer.Builder(context).build().apply {
+        setAudioAttributes(androidx.media3.common.AudioAttributes.DEFAULT, true)
+        setHandleAudioBecomingNoisy(true)
+        setMediaItem(MediaItem.fromUri(item.uri)); prepare()
+        playWhenReady = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+    } }
+    DisposableEffect(player, lifecycle) {
         val listener = object : Player.Listener { override fun onPlayerError(e: PlaybackException) { error = true } }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                player.pause()
+                player.stop() // Release decoder resources while keeping the selected media/position.
+            }
+            if (event == Lifecycle.Event.ON_START && player.playbackState == Player.STATE_IDLE) player.prepare()
+        }
         player.addListener(listener)
-        onDispose { player.removeListener(listener); player.release() }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer); player.removeListener(listener); player.release() }
     }
     Dialog(onDismissRequest = dismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Surface(Modifier.fillMaxSize(), color = OrcaPlayerColors.background) { Column(Modifier.safeDrawingPadding()) {
@@ -417,7 +448,7 @@ class OrcaModel(application: Application) : AndroidViewModel(application) {
                 Text(listOf(if (item.audio) "Original audio" else "Saved video", duration(item.duration), size(item.bytes)).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (error) Text("Your device cannot play this format. Try another player.", Modifier.padding(PlayerMetrics.messagePadding), color = MaterialTheme.colorScheme.error)
-            if (!fullscreen || error) TextButton(onClick = external, modifier = Modifier.align(Alignment.CenterHorizontally)) { OrcaActionLabel("Open with another app", Icons.AutoMirrored.Filled.OpenInNew) }
+            if (!fullscreen || error) TextButton(onClick = { player.pause(); external() }, modifier = Modifier.align(Alignment.CenterHorizontally)) { OrcaActionLabel("Open with another app", Icons.AutoMirrored.Filled.OpenInNew) }
         } }
     }
 }

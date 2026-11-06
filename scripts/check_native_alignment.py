@@ -8,7 +8,11 @@ def inspect_archive(data, prefix=""):
     result = []
     with zipfile.ZipFile(data) as archive:
         for name in archive.namelist():
-            if not (name.endswith(".so") or name.endswith(".zip.so")):
+            if name.endswith("/"):
+                continue
+            with archive.open(name) as stream:
+                magic = stream.read(4)
+            if magic != b"\x7fELF" and not (magic.startswith(b"PK") and name.endswith(".zip.so")):
                 continue
             payload = archive.read(name)
             label = prefix + name
@@ -36,4 +40,4 @@ if __name__ == "__main__":
     for name, alignment in results:
         print(f"{'OK' if alignment >= 16384 else 'CHECK'}\t{alignment}\t{name}")
     print(f"{len(results)} ELF files; {sum(a < 16384 for _, a in results)} below 16 KB alignment")
-    sys.exit(any(a < 16384 for _, a in results))
+    sys.exit(not results or any(a < 16384 for _, a in results))

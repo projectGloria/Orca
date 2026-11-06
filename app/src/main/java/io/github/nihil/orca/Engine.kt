@@ -6,6 +6,8 @@ import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.ffmpeg.FFmpeg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.CancellationException
 import org.json.JSONObject
 import java.io.File
 
@@ -45,22 +47,44 @@ interface DownloadEngine {
 
 class YtDlpEngine(private val context: Context) : DownloadEngine {
     private var initialized = false
+    private val binary get() = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")
+    private val backup get() = EngineBackup(binary, File(context.noBackupFilesDir, "orca-engine-recovery"))
+    private fun resetUpdateVersion() {
+        check(context.getSharedPreferences("youtubedl-android", Context.MODE_PRIVATE).edit()
+            .remove("dlpVersion").remove("dlpVersionName").commit()) { "Could not reset engine update metadata." }
+    }
     @Synchronized private fun init() {
         if (initialized) return
-        val binary = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")
-        val backup = File(binary.parentFile, "yt-dlp.orca-backup")
-        if (backup.exists()) { backup.copyTo(binary, overwrite = true); backup.delete() }
-        YoutubeDL.init(context); FFmpeg.init(context); initialized = true
+        // Legacy backups were not committed atomically and cannot safely be restored.
+        File(binary.parentFile, "yt-dlp.orca-backup").delete()
+        if (backup.snapshot.exists()) {
+            if (runCatching { backup.restore() }.getOrDefault(false)) resetUpdateVersion()
+            else backup.snapshot.delete() // Preserve the installed engine; verify it below.
+        }
+        YoutubeDL.init(context); FFmpeg.init(context)
+        try { verifyVersion() } catch (cancel: CancellationException) { throw cancel }
+        catch (failure: Exception) {
+            // A killed older installer may have left a truncated binary without a usable backup.
+            check(!binary.exists() || binary.delete()) { "Could not restore the bundled engine." }
+            YoutubeDL.init_ytdlp(context, binary.parentFile!!)
+            resetUpdateVersion()
+            verifyVersion()
+        }
+        backup.commit()
+        initialized = true
+    }
+    private fun verifyVersion(): String = YoutubeDL.execute(YoutubeDLRequest(emptyList()).addOption("--version")).out.trim().also {
+        check(it.matches(Regex("[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}.*"))) { "The updated engine did not report a valid version." }
     }
     private fun request(url: String) = YoutubeDLRequest(url).addOption("--socket-timeout", 25).addOption("--no-warnings").addOption("--match-filter", "!is_live")
     override suspend fun inspect(url: String): MediaInfo = withContext(Dispatchers.IO) {
         init()
-        val raw = YoutubeDL.execute(request(url).addOption("--no-playlist").addOption("--flat-playlist").addOption("--skip-download").addOption("--dump-single-json"), "inspect-${java.util.UUID.randomUUID()}").out
+        val raw = runInterruptible { YoutubeDL.execute(request(url).addOption("--no-playlist").addOption("--flat-playlist").addOption("--skip-download").addOption("--dump-single-json"), "inspect-${java.util.UUID.randomUUID()}").out }
         parse(JSONObject(raw), url)
     }
     override suspend fun playlist(url: String): List<MediaInfo> = withContext(Dispatchers.IO) {
         init()
-        val raw = YoutubeDL.execute(request(url).addOption("--yes-playlist").addOption("--flat-playlist").addOption("--skip-download").addOption("--dump-single-json"), "playlist-${java.util.UUID.randomUUID()}").out
+        val raw = runInterruptible { YoutubeDL.execute(request(url).addOption("--yes-playlist").addOption("--flat-playlist").addOption("--skip-download").addOption("--dump-single-json"), "playlist-${java.util.UUID.randomUUID()}").out }
         val root = JSONObject(raw)
         val entries = root.optJSONArray("entries") ?: return@withContext listOf(parse(root, url))
         (0 until entries.length()).mapNotNull { i -> entries.optJSONObject(i)?.let { entry ->
@@ -89,20 +113,22 @@ class YtDlpEngine(private val context: Context) : DownloadEngine {
             .addCommands(listOf("--print-to-file", "after_move:filepath", receipt.absolutePath))
         if (item.audio) request.addOption("-x").addOption("--audio-format", "best")
             .addOption("--postprocessor-args", "ExtractAudio+ffmpeg_o:-c:a copy")
-        YoutubeDL.execute(request, item.id) { percent, _, line -> progress(percent, line) }
+        runInterruptible { YoutubeDL.execute(request, item.id) { percent, _, line -> progress(percent, line) } }
         val output = receipt.takeIf { it.exists() }?.readLines()?.lastOrNull()?.let { File(it) }
             ?: directory.listFiles()?.firstOrNull { it.name.matches(Regex("media\\.[a-zA-Z0-9]+")) && it.extension !in setOf("part", "ytdl", "temp") }
         require(output != null && output.isFile && output.length() > 0) { "The engine produced no media file." }
         output
     }
     override fun cancel(id: String) { YoutubeDL.destroyProcessById(id) }
-    override suspend fun version(): String = withContext(Dispatchers.IO) { init(); YoutubeDL.execute(YoutubeDLRequest(emptyList()).addOption("--version")).out.trim() }
+    override suspend fun version(): String = withContext(Dispatchers.IO) { init(); runInterruptible { verifyVersion() } }
     override suspend fun update(): String = withContext(Dispatchers.IO) {
         init()
-        val binary = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")
-        val backup = File(binary.parentFile, "yt-dlp.orca-backup")
-        binary.copyTo(backup, overwrite = true)
-        try { YoutubeDL.updateYoutubeDL(context); version().also { backup.delete() } }
-        catch (e: Exception) { backup.copyTo(binary, overwrite = true); backup.delete(); throw e }
+        backup.prepare()
+        try { YoutubeDL.updateYoutubeDL(context); verifyVersion().also { backup.commit() } }
+        catch (failure: Exception) {
+            try { check(backup.restore()); resetUpdateVersion(); verifyVersion(); backup.commit() }
+            catch (recovery: Exception) { failure.addSuppressed(recovery); initialized = false }
+            throw failure
+        }
     }
 }
