@@ -1,6 +1,6 @@
 <resources>
-    <color name="orca_primary">#C3EF78</color>
-    <color name="orca_background">#111410</color>
+    <color name="orca_primary">#85DCEF</color>
+    <color name="orca_background">#0E1823</color>
     <!-- Launcher artwork has its own palette. -->
     <color name="orca_launcher_background">#191C19</color>
     <color name="orca_launcher_accent">#C3EF78</color>

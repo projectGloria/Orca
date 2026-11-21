@@ -39,17 +39,23 @@ class RedesignUiTest {
             fixtures.forEach { dao.put(it) }
             rule.waitUntil(10000) { rule.onAllNodesWithText(fixtures.first().title).fetchSemanticsNodes().isNotEmpty() }
             capture("library")
+            rule.onNodeWithText("Transfers (1)").performClick()
+            rule.onNodeWithText(fixtures.last().title).assertIsDisplayed()
+            rule.onNodeWithText("Search downloads").assertDoesNotExist()
+            rule.onNodeWithText("Saved media (2)").performClick()
             rule.onNodeWithText("Search downloads").performTextInput("not-a-real-title")
-            rule.onNodeWithText("No matching downloads").assertIsDisplayed()
-            rule.onNodeWithText("Reset filters").performClick()
+            rule.onNodeWithText("No matching downloads").performScrollTo().assertIsDisplayed()
+            rule.onNodeWithText("Reset filters").performScrollTo().performClick()
+            rule.onNodeWithText("No matching downloads").assertDoesNotExist()
+            rule.waitUntil(5000) { rule.onNodeWithText(fixtures.first().title).isDisplayed() }
             rule.onNodeWithText(fixtures.first().title).assertIsDisplayed()
-            rule.onNodeWithContentDescription("Settings").performClick()
+            rule.onNodeWithText("Settings").performClick()
             rule.onNodeWithText("Ask before downloading").assertIsDisplayed()
             capture("settings")
             rule.activity.onBackPressedDispatcher.let { dispatcher -> rule.runOnUiThread { dispatcher.onBackPressed() } }
             rule.onNodeWithText("Your library").assertIsDisplayed()
             rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
-            rule.onNodeWithText("Keep what\nmoves you.").assertIsDisplayed()
+            rule.onNodeWithText("New download").assertIsDisplayed()
         } finally { fixtures.forEach { dao.delete(it.id) } }
     }
 

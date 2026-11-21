@@ -40,14 +40,14 @@
 
 Orca is a native, modern Android media downloader built with Jetpack Compose Material 3, Room, AndroidX Media3, and an on-device `yt-dlp` and FFmpeg execution engine. It extracts and downloads media entirely on your hardware with no middleman server, no user account, no tracking cookies, and zero analytics.
 
-Downloads run via persistent Android 14+ User-Initiated Transfer services, keeping downloads reliable across app closures and network interruptions while saving original, uncompressed streams directly to your device's public media library.
+Downloads use Android 14+ user-initiated transfer jobs and save source streams to your device's public media library. Interrupted requests keep partial data for manual resume.
 
 ## Features
 
 - **On-device yt-dlp & FFmpeg engine:** Executes unmodified yt-dlp through Python and QuickJS locally on Android, giving you full extractor support without third-party proxies or cloud backends.
 - **Uncompromised original quality:** Video requests fetch `bestvideo*+bestaudio/best` without forced re-encoding. Audio extraction uses FFmpeg direct stream copy (`-c:a copy`) rather than lossy conversion.
 - **Android 14+ User-Initiated Transfers (UIDT):** Background downloads operate as prioritized user-initiated transfer jobs with real-time notifications, surviving process restarts and recovering interrupted partial streams.
-- **Compose Material 3 design:** Styled in a high-contrast dark palette with responsive layouts, large-font support, and fluid bottom-sheet option selectors.
+- **Compose Material 3 design:** Styled in a navy and cyan palette with a dedicated link form, a searchable library, a transfer queue, and scrollable option sheets.
 - **Playlist batch downloader:** Inspects multi-track URLs and playlists, letting you selectively pick tracks while automatically detecting and disabling private or unavailable entries.
 - **MediaStore integration:** Media files are safely staged in private application storage and published into `Movies/Orca` and `Music/Orca` upon completion, remaining accessible after uninstallation.
 - **Android 15 (16 KB page) compatibility:** Automatically patches bundled WebP native libraries during build to ensure complete 16 KB ELF segment alignment.
@@ -106,13 +106,13 @@ flowchart TD
     F --> G
     G --> H["Android 14+ UIDT Worker (2 Concurrent Jobs)"]
     H --> I["Local yt-dlp & FFmpeg Engine"]
-    I --> J["Private App Staging (noBackupFilesDir)"]
+    I --> J["Private App Staging (filesDir)"]
     J --> K["MediaStore Publication (Movies/Orca & Music/Orca)"]
     K --> L["Built-in Player & System Media Apps"]
 ```
 
 1. **Inspection:** A shared or pasted URL is inspected using `yt-dlp --dump-single-json` to query available formats, streams, and playlist entries without downloading media.
-2. **Transfer Queue:** Requests are stored in a local SQLite Room database. Two concurrent User-Initiated Transfer jobs drain the queue under foreground service notifications.
+2. **Transfer Queue:** Requests are stored in a local SQLite Room database. Two concurrent User-Initiated Transfer jobs drain the queue with progress notifications.
 3. **Stream Assembly:** Video streams merge using FFmpeg if separate DASH feeds are retrieved. Audio extraction copies the original encoded stream directly into an optimal container.
 4. **Publication:** Completed files stage in private app storage before being atomically inserted into Android's public `MediaStore` (`Movies/Orca` or `Music/Orca`). If a file with the same title already exists, a deterministic request suffix prevents accidental overwrites.
 
@@ -214,12 +214,12 @@ Then assemble the release build:
 <details>
 <summary><strong>In-app update checks</strong></summary>
 
-Navigate to **Home &rarr; Settings &rarr; App updates &rarr; Check for updates**:
+Open **Settings** and tap **Check for updates** under **Updates**.
 - Orca queries the official [projectGloria/Orca Releases API](https://github.com/projectGloria/Orca/releases) directly.
 - Compares Android version codes and presents the matching ABI APK link.
 - Never downloads or installs updates silently; tapping **Download update** directs you to the official GitHub APK release download.
 
-Engine updates for the embedded `yt-dlp` executable are handled separately under **Download engine &rarr; Check for engine update**. Orca maintains an atomic engine backup to automatically roll back if an update is interrupted or corrupt.
+Engine updates for the embedded `yt-dlp` executable are handled separately under **Settings &rarr; Updates &rarr; Check for engine update**. Orca maintains an atomic engine backup to automatically roll back if an update is interrupted or corrupt.
 </details>
 
 <details>
@@ -257,4 +257,4 @@ Orca is developed as an open-source personal project. It incorporates and depend
 
 For complete component details, patent grants, and third-party notices, refer to [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-For test suites, emulator logs, and live source probe records, see [VALIDATION.md](VALIDATION.md).
+For prior build and runtime results, see [VALIDATION.md](VALIDATION.md). For current findings and the interface redesign, see the [Orca project review](docs/PROJECT_REVIEW.md).

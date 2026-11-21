@@ -1,8 +1,10 @@
 package io.github.nihil.orca
 
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -64,7 +66,12 @@ class MediaPublisher(private val context: Context) {
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         // On process death between insertion and Room commit, recover the deterministic name.
-        val existing = resolver.query(collection, arrayOf(MediaStore.MediaColumns._ID), "${MediaStore.MediaColumns.DISPLAY_NAME} = ?", arrayOf("$name-${item.id}.$extension"), null)?.use { cursor ->
+        val lookup = Bundle().apply {
+            putInt(MediaStore.QUERY_ARG_MATCH_PENDING, MediaStore.MATCH_INCLUDE)
+            putString(ContentResolver.QUERY_ARG_SQL_SELECTION, "${MediaStore.MediaColumns.DISPLAY_NAME} = ?")
+            putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, arrayOf("$name-${item.id}.$extension"))
+        }
+        val existing = resolver.query(collection, arrayOf(MediaStore.MediaColumns._ID), lookup, null)?.use { cursor ->
             if (cursor.moveToFirst()) android.content.ContentUris.withAppendedId(collection, cursor.getLong(0)) else null
         }
         return (existing ?: requireNotNull(resolver.insert(collection, values))).toString() to mime

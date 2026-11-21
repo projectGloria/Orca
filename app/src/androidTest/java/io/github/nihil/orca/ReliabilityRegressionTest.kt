@@ -83,7 +83,7 @@ class ReliabilityRegressionTest {
         rule.onNodeWithText("Downloads").performClick()
         rule.onNodeWithText("Search downloads").performTextInput("audit-preserve-my-search")
         rule.onNodeWithText("audit-preserve-my-search").assertExists()
-        rule.onNodeWithContentDescription("Settings").performClick()
+        rule.onNodeWithText("Settings").performClick()
         rule.onNodeWithContentDescription("Back").performClick()
         rule.onNodeWithText("Your library").assertIsDisplayed()
         rule.onNodeWithText("audit-preserve-my-search").assertExists()

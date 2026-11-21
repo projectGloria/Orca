@@ -21,10 +21,10 @@ class OptionsUiTest {
         var downloaded: List<MediaInfo>? = null
         rule.runOnUiThread { rule.activity.setContent { OrcaTheme { OptionsSheet(OptionsState(media, true), {}, { items, _ -> downloaded = items }) } } }
         rule.onNodeWithText("Download 2 items").assertIsDisplayed()
-        captureRedesign("playlist")
         rule.onNodeWithContentDescription("Select Private item").assertIsNotEnabled()
         rule.onNodeWithContentDescription("Select Second item").performClick()
         rule.onNodeWithText("Download 1 item").assertIsDisplayed()
+        captureRedesign("playlist")
         rule.onNodeWithTag("confirmDownload").performClick()
         assertEquals(listOf(media.first()), downloaded)
     }

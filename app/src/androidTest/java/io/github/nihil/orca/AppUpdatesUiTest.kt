@@ -12,7 +12,7 @@ class AppUpdatesUiTest {
     @get:Rule(order = 0) val notifications = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
     @get:Rule(order = 1) val rule = createAndroidComposeRule<MainActivity>()
     @Test fun settingsHasSeparateAppUpdateAction() {
-        rule.onNodeWithContentDescription("Settings").performClick()
+        rule.onNodeWithText("Settings").performClick()
         rule.onNodeWithText("Check for updates").performScrollTo().assertIsDisplayed()
         rule.onNodeWithText("Orca ${BuildConfig.VERSION_NAME}").assertIsDisplayed()
     }

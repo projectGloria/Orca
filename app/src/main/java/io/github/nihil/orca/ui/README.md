@@ -1,21 +1,7 @@
 # Orca interface
 
-The interface uses a warm charcoal palette, warm white text, and a lime primary accent. Color is reserved for actions, selection, progress, and status. Panels use a subtle border instead of shadows; headings establish hierarchy before containers do.
+Home starts a download, Downloads contains saved media and transfers, and Settings contains preferences and updates. The bottom navigation exposes all three destinations. Back returns from Settings to the previous destination and from Downloads to Home.
 
-## Ownership
+The dark navy scheme uses cyan for primary actions and progress. Material semantic colors apply to screens, lists, sheets and dialogs. Shared tokens in `theme/` define typography, surfaces and spacing. `components/` contains navigation, panels and action buttons. `HomeContent.kt` owns the link form and downloads summary. `OptionsSheet.kt` owns format and playlist selection.
 
-- `theme/Color.kt`: Material semantic colors, including containers, outlines, errors and inverse surfaces. Startup and launcher colors live in `res/values/colors.xml`.
-- `theme/Type.kt`: scalable typography and semantic title roles.
-- `theme/Spacing.kt`: shared rhythm, page insets, touch target and bounded content width.
-- `theme/Shape.kt`: panel, input, button and Material shapes.
-- `components/Metrics.kt` and `components/Surfaces.kt`: component geometry and reusable panels, headings, navigation, brand bar, information rows and empty states.
-- `ScreenMetrics.kt`: options preview, playlist viewport and player geometry.
-- `HomeContent.kt`: home composition, link composer and collection summary.
-
-Use the Material color scheme for every surface, including dialogs and sheets. Prefer a shared component variant before adding a screen-specific implementation. Keep one-off geometry in a named metric. The main column and header share a bounded width; phones retain the same page inset.
-
-## Behavior
-
-Navigation selection and settings visibility survive recreation. Android Back returns from Settings to the previous tab, then from Downloads to Home. Search and media filtering are independent, with an explicit reset when a result is empty. Completed media thumbnails and titles form one playback target. Deletion requires confirmation. Long content titles may wrap to two lines; body copy wraps without clipping. Loading, unavailable, interrupted, failed and disabled states remain explicit.
-
-The download engine, original-quality selection, queue, local storage and application updater keep their existing behavior.
+Downloads maintains its search string and selected media filter during navigation. The link draft is stored in saved instance state. Saved rows open the player and expose file actions in the overflow menu. Transfers display queue state, progress and recovery actions. Playlist confirmation stays visible while the sheet scrolls.

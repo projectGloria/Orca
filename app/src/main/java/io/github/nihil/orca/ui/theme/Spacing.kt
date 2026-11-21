@@ -13,13 +13,13 @@ internal object OrcaSpacing {
     val huge = 48.dp
 }
 internal object OrcaLayout {
-    val pageInset = OrcaSpacing.xxl
+    val pageInset = OrcaSpacing.xl
     val settingsInset = pageInset
     val sheetInset = pageInset
     val contentMaxWidth = 680.dp
     val homeItemGap = OrcaSpacing.xxl
-    val libraryItemGap = OrcaSpacing.lg
-    val settingsSectionGap = OrcaSpacing.xxl
+    val libraryItemGap = OrcaSpacing.sm
+    val settingsSectionGap = OrcaSpacing.lg
     val dividerWidth = 1.dp
     val touchTarget = 48.dp
 }

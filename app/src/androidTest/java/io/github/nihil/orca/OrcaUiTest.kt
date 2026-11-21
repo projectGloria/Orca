@@ -16,9 +16,9 @@ class OrcaUiTest {
     @get:Rule(order = 0) val notifications = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
     @get:Rule(order = 1) val rule = createAndroidComposeRule<MainActivity>()
     @Test fun homeLibraryAndSettingsAreReachable() {
-        rule.onNodeWithText("Keep what\nmoves you.").assertIsDisplayed()
+        rule.onNodeWithText("New download").assertIsDisplayed()
         rule.onNodeWithText("Download", useUnmergedTree = true).assertIsDisplayed()
-        rule.onNodeWithContentDescription("Settings").performClick()
+        rule.onNodeWithText("Settings").performClick()
         rule.onNodeWithText("Ask before downloading").assertIsDisplayed()
         rule.onNodeWithContentDescription("Back").performClick()
         rule.onNodeWithText("Downloads").performClick()
@@ -55,6 +55,7 @@ class OrcaUiTest {
     @Test fun receivingSharedTextOnlyFillsTheLink() = runBlocking {
         val repo = rule.activity.repository
         val before = repo.dao.all().size
+        rule.onNodeWithText("Downloads").performClick()
         rule.runOnUiThread {
             rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).setAction(Intent.ACTION_SEND)
                 .putExtra(Intent.EXTRA_TEXT, "Watch this https://example.org/video.mp4.").addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
