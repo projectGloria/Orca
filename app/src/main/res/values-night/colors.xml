@@ -1,0 +1,4 @@
+<resources>
+    <color name="orca_primary">@android:color/system_accent1_200</color>
+    <color name="orca_background">@android:color/system_neutral1_900</color>
+</resources>

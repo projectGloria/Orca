@@ -12,6 +12,7 @@ Orca includes or depends on these upstream components. Their source and license 
 * Kotlin and kotlinx.coroutines — Apache 2.0. [Source and license](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt).
 * Coil 2.7.0 — Apache 2.0. [Source and license](https://github.com/coil-kt/coil/tree/2.7.0).
 * Jackson — Apache 2.0. [Source](https://github.com/FasterXML/jackson).
+* Seal — GPL-3.0-or-later. Orca's navigation drawer, download sheet, media cards, preference rows and dynamic-color theme are adapted from Seal's interface. Copyright JunkFood02 and contributors. [Source and license](https://github.com/JunkFood02/Seal/blob/main/LICENSE).
 * Apache Commons IO — Apache 2.0. [Source and notices](https://commons.apache.org/proper/commons-io/).
 
 Engine updates may change yt-dlp and its included dependencies independently of Orca. The full dependency graph can be obtained with `./gradlew :app:dependencies`. Gradle packaging excludes duplicate META-INF license resources; notices are included as application assets instead.

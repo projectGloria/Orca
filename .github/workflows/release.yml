@@ -1,26 +1,99 @@
 name: Signed release
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths: [version.properties]
-    tags: ['v*']
-  release:
-    types: [published]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build signed APKs without publishing a release
+        type: boolean
+        default: true
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: signed-release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  check-version:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 5
+    outputs:
+      should_release: ${{ steps.gate.outputs.should_release }}
+      version: ${{ steps.version.outputs.name }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Validate release version
+        id: version
+        shell: bash
+        run: python3 scripts/release.py version
+      - name: Check whether this version should publish
+        id: gate
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_VERSION: ${{ steps.version.outputs.name }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            if [[ "$DRY_RUN" == true ]]; then
+              echo 'should_release=false' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+              echo 'Select main to publish a release.' >&2
+              exit 1
+            fi
+          elif [[ "$BEFORE_SHA" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
+            previous_file=$(git ls-tree --name-only "$BEFORE_SHA" -- version.properties)
+            if [[ -n "$previous_file" ]]; then
+              previous_version=$(git show "$BEFORE_SHA:version.properties" | python3 -c '
+          import configparser
+          import sys
+          properties = configparser.ConfigParser(interpolation=None)
+          properties.read_string("[version]\n" + sys.stdin.read())
+          print(properties["version"]["versionName"])
+          ')
+              if [[ "$CURRENT_VERSION" == "$previous_version" ]]; then
+                echo "Version unchanged ($CURRENT_VERSION). Skipping release."
+                echo 'should_release=false' >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"; then
+            echo "Tag $RELEASE_TAG already exists. Skipping release."
+            echo 'should_release=false' >> "$GITHUB_OUTPUT"
+          else
+            status=$?
+            if [[ "$status" != 2 ]]; then
+              echo "Failed to check tag $RELEASE_TAG on origin." >&2
+              exit "$status"
+            fi
+            echo 'should_release=true' >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check-version
+    if: needs.check-version.outputs.should_release == 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
@@ -32,10 +105,8 @@ jobs:
           cmdline-tools-version: '12266719'
           packages: 'platforms;android-35 build-tools;35.0.0'
           log-accepted-android-sdk-licenses: false
-      - name: Validate release version
-        id: version
-        run: python3 scripts/release.py version
       - name: Restore signing key
+        shell: bash
         env:
           ORCA_KEYSTORE_BASE64: ${{ secrets.ORCA_KEYSTORE_BASE64 }}
           ORCA_STORE_PASSWORD: ${{ secrets.ORCA_STORE_PASSWORD }}
@@ -59,27 +130,53 @@ jobs:
           Path('signing.properties').chmod(0o600)
           PY
       - name: Test and build signed APKs
+        shell: bash
         run: |
           python3 -m unittest discover -s scripts -p 'test_*.py'
           bash gradlew testDebugUnitTest lintDebug assembleRelease
       - name: Verify and package
+        shell: bash
         run: |
           for apk in app/build/outputs/apk/release/*-release.apk; do
             "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$apk"
             python3 scripts/check_native_alignment.py "$apk"
           done
           python3 scripts/release.py package
-      - name: Publish release assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/release.py publish --repository "$GITHUB_REPOSITORY"
       - name: Remove signing files
         if: always()
+        shell: bash
         run: rm -f signing.properties "$RUNNER_TEMP/orca-personal.jks"
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        id: upload
         with:
-          name: Orca-${{ steps.version.outputs.name }}
+          name: Orca-${{ needs.check-version.outputs.version }}-${{ github.run_attempt }}
           path: dist/
           if-no-files-found: error
           retention-days: 3
           compression-level: 0
+
+  release:
+    needs: [check-version, build]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: dist/
+      - name: Verify asset checksums
+        shell: bash
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS.txt
+      - name: Publish release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/release.py publish --repository "$GITHUB_REPOSITORY"

@@ -1,30 +1,49 @@
 package io.github.nihil.orca.ui.theme
 
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.runtime.Composable
+import android.content.Context
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import io.github.nihil.orca.R
 
-@Composable
-internal fun orcaColorScheme() = darkColorScheme(
-    primary = colorResource(R.color.orca_primary), onPrimary = Color(0xFF062B33),
-    primaryContainer = Color(0xFF143B48), onPrimaryContainer = Color(0xFFB1ECFA),
-    secondary = Color(0xFFADC8DD), onSecondary = Color(0xFF163042),
-    secondaryContainer = Color(0xFF233C50), onSecondaryContainer = Color(0xFFDAEBFA),
-    tertiary = Color(0xFFC8BFFE), onTertiary = Color(0xFF30275D),
-    tertiaryContainer = Color(0xFF463D71), onTertiaryContainer = Color(0xFFE7DEFF),
-    background = colorResource(R.color.orca_background), onBackground = Color(0xFFEAF3FA),
-    surface = Color(0xFF152431), onSurface = Color(0xFFEAF3FA),
-    surfaceVariant = Color(0xFF253746), onSurfaceVariant = Color(0xFFB3C6D5),
-    surfaceContainerLowest = Color(0xFF0B131D), surfaceContainerLow = Color(0xFF111E2A),
-    surfaceContainer = Color(0xFF162633), surfaceContainerHigh = Color(0xFF1C2F3E),
-    surfaceContainerHighest = Color(0xFF263B4B),
-    outline = Color(0xFF7790A4), outlineVariant = Color(0xFF354D60),
-    error = Color(0xFFFFB4A8), onError = Color(0xFF571E17),
-    errorContainer = Color(0xFF43251F), onErrorContainer = Color(0xFFFFDAD3),
-    inverseSurface = Color(0xFFEAF3FA), inverseOnSurface = Color(0xFF152431),
-    inversePrimary = Color(0xFF006476),
-)
+/** Material You scheme generated from the device wallpaper (Orca's minSdk always supports it). */
+internal fun orcaColorScheme(context: Context, dark: Boolean): ColorScheme =
+    if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+
+/** Material 3 "fixed" roles: identical in light and dark themes. Compose Material3 stable has no API for them yet. */
+@Immutable
+internal data class FixedColorRoles(
+    val primaryFixed: Color, val primaryFixedDim: Color, val onPrimaryFixed: Color, val onPrimaryFixedVariant: Color,
+    val secondaryFixed: Color, val secondaryFixedDim: Color, val onSecondaryFixed: Color, val onSecondaryFixedVariant: Color,
+    val tertiaryFixed: Color, val tertiaryFixedDim: Color, val onTertiaryFixed: Color, val onTertiaryFixedVariant: Color,
+) {
+    companion object {
+        /** Tones 90/80/10/30 of the system accent palettes. */
+        fun fromSystem(context: Context): FixedColorRoles {
+            fun c(id: Int) = Color(context.getColor(id))
+            return FixedColorRoles(
+                c(android.R.color.system_accent1_100), c(android.R.color.system_accent1_200),
+                c(android.R.color.system_accent1_900), c(android.R.color.system_accent1_700),
+                c(android.R.color.system_accent2_100), c(android.R.color.system_accent2_200),
+                c(android.R.color.system_accent2_900), c(android.R.color.system_accent2_700),
+                c(android.R.color.system_accent3_100), c(android.R.color.system_accent3_200),
+                c(android.R.color.system_accent3_900), c(android.R.color.system_accent3_700),
+            )
+        }
+        val Unspecified = Color.Unspecified.let { u -> FixedColorRoles(u, u, u, u, u, u, u, u, u, u, u, u) }
+    }
+}
+
+internal val LocalFixedColorRoles = staticCompositionLocalOf { FixedColorRoles.Unspecified }
+internal val LocalDarkTheme = staticCompositionLocalOf { false }
+
+internal object OrcaColors {
+    /** Translucent scrim behind labels drawn over thumbnails. */
+    val label = Color.Black.copy(alpha = 0.68f)
+    val successDark = Color(0xFF7CDA97)
+    val successLight = Color(0xFF1C6D37)
+}
 
 internal object OrcaPlayerColors { val background = Color.Black }

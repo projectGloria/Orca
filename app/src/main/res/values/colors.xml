@@ -1,9 +1,5 @@
 <resources>
-    <color name="orca_primary">#85DCEF</color>
-    <color name="orca_background">#0E1823</color>
-    <!-- Launcher artwork has its own palette. -->
-    <color name="orca_launcher_background">#191C19</color>
-    <color name="orca_launcher_accent">#C3EF78</color>
-    <color name="orca_launcher_highlight">#F1F2E9</color>
-    <color name="orca_launcher_detail">#111410</color>
+    <color name="orca_primary">@android:color/system_accent1_600</color>
+    <color name="orca_background">@android:color/system_neutral1_10</color>
+    <color name="orca_launcher_background">#045FBC</color>
 </resources>

@@ -21,10 +21,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import coil.compose.AsyncImage
-import io.github.nihil.orca.ui.OptionsSheetMetrics
-import io.github.nihil.orca.ui.components.DarkDialogSystemBars
-import io.github.nihil.orca.ui.components.OrcaPrimaryButton
-import io.github.nihil.orca.ui.components.SectionHeading
+import io.github.nihil.orca.ui.components.DialogSystemBars
+import io.github.nihil.orca.ui.components.FilledButtonWithIcon
+import io.github.nihil.orca.ui.components.SheetHeader
+import androidx.compose.ui.unit.dp
 import io.github.nihil.orca.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -56,30 +56,33 @@ import io.github.nihil.orca.ui.theme.*
             confirmValueChange = { it != SheetValue.Hidden || !submissionInProgress },
         ),
     ) {
-        DarkDialogSystemBars()
-        Column(Modifier.fillMaxWidth().padding(horizontal = OrcaLayout.sheetInset)) {
+        DialogSystemBars()
+        Column(Modifier.fillMaxWidth().padding(horizontal = OrcaSpacing.xxl)) {
             LazyColumn(
                 Modifier.weight(1f, fill = false),
                 contentPadding = PaddingValues(bottom = OrcaSpacing.lg),
                 verticalArrangement = Arrangement.spacedBy(OrcaSpacing.md),
             ) {
                 item {
-                    Text(if (state.playlist) "Choose playlist items" else "Download options", style = OrcaTextStyles.sheetTitle)
+                    SheetHeader(
+                        if (state.playlist) "Choose playlist items" else "Download options",
+                        if (state.playlist) Icons.Default.PlaylistAddCheck else Icons.Default.Tune,
+                    )
                 }
                 if (!state.playlist && first != null) item { MediaPreview(first) }
                 item {
-                    SectionHeading("Format")
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(OrcaSpacing.sm)) {
-                        FilterChip(
-                            !audio, { audio = false }, label = { Text("Video") }, enabled = !submitting,
-                            leadingIcon = { Icon(Icons.Default.Videocam, null) },
-                            modifier = Modifier.heightIn(min = OrcaLayout.touchTarget),
-                        )
-                        FilterChip(
-                            audio, { audio = true }, label = { Text("Audio") }, enabled = !submitting,
-                            leadingIcon = { Icon(Icons.Default.Headphones, null) },
-                            modifier = Modifier.heightIn(min = OrcaLayout.touchTarget),
-                        )
+                    Text("Format", Modifier.padding(bottom = OrcaSpacing.sm), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                        SegmentedButton(
+                            selected = !audio, onClick = { audio = false }, enabled = !submitting,
+                            shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            icon = { SegmentedButtonDefaults.Icon(!audio) { Icon(Icons.Default.Videocam, null, Modifier.size(SegmentedButtonDefaults.IconSize)) } },
+                        ) { Text("Video") }
+                        SegmentedButton(
+                            selected = audio, onClick = { audio = true }, enabled = !submitting,
+                            shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            icon = { SegmentedButtonDefaults.Icon(audio) { Icon(Icons.Default.Headphones, null, Modifier.size(SegmentedButtonDefaults.IconSize)) } },
+                        ) { Text("Audio") }
                     }
                 }
                 item {
@@ -138,11 +141,11 @@ import io.github.nihil.orca.ui.theme.*
                 state.playlist -> "Download ${selected.size} ${if (selected.size == 1) "item" else "items"}"
                 else -> "Download"
             }
-            OrcaPrimaryButton(
-                button, { download(state.media.filterIndexed { index, _ -> index in selected }, DownloadOptions(audio, height)) },
-                modifier = Modifier.padding(vertical = OrcaSpacing.sm).testTag("confirmDownload"),
+            FilledButtonWithIcon(
+                button, Icons.Default.FileDownload,
+                { download(state.media.filterIndexed { index, _ -> index in selected }, DownloadOptions(audio, height)) },
+                modifier = Modifier.fillMaxWidth().padding(top = OrcaSpacing.md, bottom = OrcaSpacing.xxl).testTag("confirmDownload"),
                 enabled = selected.isNotEmpty() && !submitting,
-                icon = Icons.Default.FileDownload,
             )
         }
     }
@@ -154,8 +157,8 @@ import io.github.nihil.orca.ui.theme.*
         horizontalArrangement = Arrangement.spacedBy(OrcaSpacing.md),
     ) {
         Box(
-            Modifier.size(OptionsSheetMetrics.previewWidth, OptionsSheetMetrics.previewHeight)
-                .clip(OrcaShapes.badge).background(MaterialTheme.colorScheme.surfaceVariant),
+            Modifier.width(128.dp).aspectRatio(16f / 9f)
+                .clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
             Icon(Icons.Default.VideoLibrary, null, tint = MaterialTheme.colorScheme.primary)
@@ -175,7 +178,7 @@ import io.github.nihil.orca.ui.theme.*
     var expanded by remember { mutableStateOf(false) }
     Box {
         OutlinedButton(
-            onClick = { expanded = true }, enabled = enabled,
+            onClick = { expanded = true }, enabled = enabled, shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth().heightIn(min = OrcaLayout.touchTarget),
         ) {
             Text(if (height == 0) "Best available" else "Up to ${height}p", Modifier.weight(1f))

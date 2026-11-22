@@ -9,17 +9,14 @@ internal object OrcaSpacing {
     val lg = 16.dp
     val xl = 20.dp
     val xxl = 24.dp
-    val xxxl = 32.dp
-    val huge = 48.dp
+    val sheet = 28.dp
 }
 internal object OrcaLayout {
     val pageInset = OrcaSpacing.xl
-    val settingsInset = pageInset
-    val sheetInset = pageInset
-    val contentMaxWidth = 680.dp
-    val homeItemGap = OrcaSpacing.xxl
-    val libraryItemGap = OrcaSpacing.sm
-    val settingsSectionGap = OrcaSpacing.lg
-    val dividerWidth = 1.dp
+    val contentMaxWidth = 840.dp
+    val gridMinCellWidth = 240.dp
+    val gridGap = 24.dp
+    val fabClearance = 80.dp
+    val headerHeight = 64.dp
     val touchTarget = 48.dp
 }

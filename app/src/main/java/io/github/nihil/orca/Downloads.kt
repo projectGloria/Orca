@@ -254,7 +254,7 @@ class TransferService : JobService() {
     }
     private fun notification(item: DownloadItem?, slot: Int): Notification {
         val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val builder = Notification.Builder(this, "downloads").setSmallIcon(R.drawable.ic_orca).setContentTitle(item?.title ?: "Orca")
+        val builder = Notification.Builder(this, "downloads").setSmallIcon(R.drawable.ic_stat_orca).setContentTitle(item?.title ?: "Orca")
             .setContentText(item?.state?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Preparing downloads")
             .setContentIntent(open).setOnlyAlertOnce(true).setOngoing(item?.state in DownloadRepository.activeStates || item == null)
         if (item != null && item.state in DownloadRepository.activeStates) {

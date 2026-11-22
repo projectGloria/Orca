@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/icon.svg" alt="Orca Icon" width="96" height="96" />
+  <img src="docs/assets/icon.png" alt="Orca Icon" width="96" height="96" />
 </p>
 
 <h1 align="center">Orca</h1>
@@ -254,6 +254,7 @@ Orca is developed as an open-source personal project. It incorporates and depend
 | **AndroidX & Jetpack** | Apache 2.0 | [Android Open Source Project](https://android.googlesource.com/platform/frameworks/support/) |
 | **Kotlin & Coroutines** | Apache 2.0 | [JetBrains/kotlin](https://github.com/JetBrains/kotlin) |
 | **Coil** | Apache 2.0 | [coil-kt/coil](https://github.com/coil-kt/coil) |
+| **Seal** (interface design) | GPL v3 or later | [JunkFood02/Seal](https://github.com/JunkFood02/Seal) (layout, theme and components adapted) |
 
 For complete component details, patent grants, and third-party notices, refer to [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 

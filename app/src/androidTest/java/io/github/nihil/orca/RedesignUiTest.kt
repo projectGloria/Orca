@@ -34,28 +34,33 @@ class RedesignUiTest {
         )
         try {
             capture("home")
-            rule.onNodeWithText("Downloads").performClick()
+            rule.openLinkSheet()
+            capture("new-download")
+            rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+            rule.waitForIdle()
+            rule.openDestination("Library")
             capture("library-empty")
             fixtures.forEach { dao.put(it) }
             rule.waitUntil(10000) { rule.onAllNodesWithText(fixtures.first().title).fetchSemanticsNodes().isNotEmpty() }
             capture("library")
-            rule.onNodeWithText("Transfers (1)").performClick()
-            rule.onNodeWithText(fixtures.last().title).assertIsDisplayed()
-            rule.onNodeWithText("Search downloads").assertDoesNotExist()
-            rule.onNodeWithText("Saved media (2)").performClick()
+            rule.onNodeWithText(fixtures.last().title).assertDoesNotExist()
             rule.onNodeWithText("Search downloads").performTextInput("not-a-real-title")
             rule.onNodeWithText("No matching downloads").performScrollTo().assertIsDisplayed()
             rule.onNodeWithText("Reset filters").performScrollTo().performClick()
             rule.onNodeWithText("No matching downloads").assertDoesNotExist()
             rule.waitUntil(5000) { rule.onNodeWithText(fixtures.first().title).isDisplayed() }
             rule.onNodeWithText(fixtures.first().title).assertIsDisplayed()
-            rule.onNodeWithText("Settings").performClick()
+            rule.openDestination("Settings")
             rule.onNodeWithText("Ask before downloading").assertIsDisplayed()
             capture("settings")
             rule.activity.onBackPressedDispatcher.let { dispatcher -> rule.runOnUiThread { dispatcher.onBackPressed() } }
-            rule.onNodeWithText("Your library").assertIsDisplayed()
+            rule.onHeading("Library").assertIsDisplayed()
             rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
-            rule.onNodeWithText("New download").assertIsDisplayed()
+            rule.onHeading("Download queue").assertIsDisplayed()
+            rule.onNode(hasText("Stopped") and hasClickAction()).performClick()
+            rule.onNodeWithText(fixtures.last().title).assertIsDisplayed()
+            rule.onNodeWithText(fixtures.first().title).assertDoesNotExist()
+            capture("queue")
         } finally { fixtures.forEach { dao.delete(it.id) } }
     }
 

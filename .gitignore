@@ -14,3 +14,6 @@ __pycache__/
 dist/
 *.idsig
 *.apk
+
+# Local Seal fork used as a design reference
+galaxy/

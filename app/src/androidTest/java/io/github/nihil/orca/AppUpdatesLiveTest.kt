@@ -17,7 +17,7 @@ class AppUpdatesLiveTest {
         assumeTrue(InstrumentationRegistry.getArguments().getString("liveUpdates") == "true")
         val updates = GitHubAppUpdates()
         val abis = Build.SUPPORTED_ABIS.toList()
-        rule.onNodeWithText("Settings").performClick()
+        rule.openDestination("Settings")
         rule.onNodeWithText("Check for updates").performScrollTo().performClick()
         rule.waitUntil(60000) { rule.onAllNodesWithText("You're up to date.").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("You're up to date.").assertIsDisplayed()

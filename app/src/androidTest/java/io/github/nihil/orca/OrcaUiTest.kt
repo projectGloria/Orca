@@ -16,14 +16,18 @@ class OrcaUiTest {
     @get:Rule(order = 0) val notifications = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
     @get:Rule(order = 1) val rule = createAndroidComposeRule<MainActivity>()
     @Test fun homeLibraryAndSettingsAreReachable() {
-        rule.onNodeWithText("New download").assertIsDisplayed()
+        rule.onHeading("Download queue").assertIsDisplayed()
+        rule.openLinkSheet()
+        rule.onNodeWithText("Video or playlist link").assertIsDisplayed()
         rule.onNodeWithText("Download", useUnmergedTree = true).assertIsDisplayed()
-        rule.onNodeWithText("Settings").performClick()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.waitForIdle()
+        rule.openDestination("Settings")
         rule.onNodeWithText("Ask before downloading").assertIsDisplayed()
         rule.onNodeWithContentDescription("Back").performClick()
-        rule.onNodeWithText("Downloads").performClick()
-        rule.onNodeWithText("Search downloads").assertIsDisplayed()
-        rule.onNodeWithText("Audio").performClick()
+        rule.onHeading("Download queue").assertIsDisplayed()
+        rule.openDestination("Library")
+        rule.onHeading("Library").assertIsDisplayed()
     }
     @Test fun queuedTransferCompletesWithScreenLocked() = runBlocking {
         val server = FixtureServer()
@@ -31,6 +35,7 @@ class OrcaUiTest {
         var id: String? = null
         try {
             val before = repo.dao.all().map { it.id }.toSet()
+            rule.openLinkSheet()
             rule.onNodeWithText("Video or playlist link").performTextInput(server.url)
             rule.onNodeWithText("Download", useUnmergedTree = true).performClick()
             withTimeout(30000) {
@@ -55,7 +60,7 @@ class OrcaUiTest {
     @Test fun receivingSharedTextOnlyFillsTheLink() = runBlocking {
         val repo = rule.activity.repository
         val before = repo.dao.all().size
-        rule.onNodeWithText("Downloads").performClick()
+        rule.openDestination("Library")
         rule.runOnUiThread {
             rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).setAction(Intent.ACTION_SEND)
                 .putExtra(Intent.EXTRA_TEXT, "Watch this https://example.org/video.mp4.").addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
@@ -69,6 +74,7 @@ class OrcaUiTest {
         val before = repo.dao.all().size
         try {
             repo.preferences.setAsk(true)
+            rule.openLinkSheet()
             rule.onNodeWithText("Video or playlist link").performTextInput(server.url)
             rule.onNodeWithText("Download", useUnmergedTree = true).performClick()
             rule.waitUntil(30000) { rule.onAllNodesWithText("Download options").fetchSemanticsNodes().isNotEmpty() }
@@ -105,6 +111,7 @@ class OrcaUiTest {
         val before = repo.dao.all().size
         try {
             val url = server.url.substringBefore("/dash/") + "/playlist.html"
+            rule.openLinkSheet()
             rule.onNodeWithText("Video or playlist link").performTextInput(url)
             rule.onNodeWithText("Download", useUnmergedTree = true).performClick()
             rule.waitUntil(30000) { rule.onAllNodesWithText("Choose playlist items").fetchSemanticsNodes().isNotEmpty() }

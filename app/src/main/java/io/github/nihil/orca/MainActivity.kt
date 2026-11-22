@@ -1,88 +1,96 @@
 package io.github.nihil.orca
 
 import android.Manifest
-import android.content.Intent
+import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.os.Build
+import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.SystemBarStyle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.ui.draw.clip
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import io.github.nihil.orca.ui.*
-import io.github.nihil.orca.ui.components.*
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import coil.compose.AsyncImage
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CancellationException
-import android.app.Application
-import io.github.nihil.orca.ui.components.DownloadCardMetrics
-import io.github.nihil.orca.ui.components.OrcaActionLabel
-import io.github.nihil.orca.ui.components.OrcaOutlinedActionButton
+import io.github.nihil.orca.ui.*
+import io.github.nihil.orca.ui.components.*
+import io.github.nihil.orca.ui.theme.OrcaDynamicTheme
 import io.github.nihil.orca.ui.theme.OrcaLayout
 import io.github.nihil.orca.ui.theme.OrcaPlayerColors
-import io.github.nihil.orca.ui.theme.OrcaShapes
 import io.github.nihil.orca.ui.theme.OrcaSpacing
-import io.github.nihil.orca.ui.theme.OrcaTextStyles
-import io.github.nihil.orca.ui.theme.OrcaTypography
-import io.github.nihil.orca.ui.theme.orcaColorScheme
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val model: OrcaModel by viewModels()
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
+        enableEdgeToEdge()
         if (savedInstanceState == null) accept(intent)
         permission.launch(Manifest.permission.POST_NOTIFICATIONS)
         setContent { OrcaTheme { OrcaApp(model) } }
@@ -176,9 +184,14 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
     }
 }
 
-@Composable fun OrcaTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = orcaColorScheme(), typography = OrcaTypography, shapes = OrcaShapes.material, content = content)
-}
+@Composable fun OrcaTheme(content: @Composable () -> Unit) = OrcaDynamicTheme(content = content)
+
+private val destinations = listOf(
+    DrawerDestination("Download queue", Icons.Outlined.Download, Icons.Filled.Download),
+    DrawerDestination("Library", Icons.Outlined.VideoLibrary, Icons.Filled.VideoLibrary),
+    DrawerDestination("Settings", Icons.Outlined.Settings, Icons.Filled.Settings),
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun OrcaApp(model: OrcaModel) {
     val items by model.items.collectAsStateWithLifecycle()
@@ -195,108 +208,113 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
     val appUpdateStatus by model.appUpdateStatus.collectAsStateWithLifecycle()
     val appRelease by model.availableAppRelease.collectAsStateWithLifecycle()
     var destination by rememberSaveable { mutableIntStateOf(0) }
-    var settings by rememberSaveable { mutableStateOf(false) }
+    var previous by rememberSaveable { mutableIntStateOf(0) }
+    var linkSheet by rememberSaveable { mutableStateOf(false) }
+    var sheetItemId by rememberSaveable { mutableStateOf<String?>(null) }
     var playing by remember { mutableStateOf<DownloadItem?>(null) }
     var deleting by remember { mutableStateOf<DownloadItem?>(null) }
     var errorItem by remember { mutableStateOf<DownloadItem?>(null) }
-    var showTransfers by rememberSaveable { mutableStateOf(false) }
     var handledShare by rememberSaveable { mutableStateOf<String?>(null) }
     val sharedLinkEvent by model.sharedLinkEvent.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val drawer = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
     val screenState = rememberSaveableStateHolder()
     val context = LocalContext.current
     fun play(item: DownloadItem) = model.action {
         if (withContext(Dispatchers.IO) { model.repo.publisher.exists(item.uri) }) playing = item else { model.message.value = "File is missing. Download it again from the original link."; model.details.value = "" }
     }
+    fun navigate(next: Int) {
+        scope.launch { drawer.close() }
+        if (next == 2 && destination != 2) previous = destination
+        destination = next
+    }
+    val openDrawer: () -> Unit = { scope.launch { drawer.open() } }
+    val actions = DownloadActions(
+        play = { play(it) },
+        share = { share(context, it, model) },
+        resume = { model.action { model.repo.resume(it) } },
+        cancel = { model.action { model.repo.cancel(it.id) } },
+        details = { errorItem = it },
+        openLink = { openLink(context, it.url) },
+        copyLink = { context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Link", it.url)) },
+        delete = { deleting = it },
+    )
     LaunchedEffect(sharedLinkEvent) {
         if (sharedLinkEvent != null && sharedLinkEvent != handledShare) {
             handledShare = sharedLinkEvent
-            settings = false
             destination = 0
+            linkSheet = true
         }
     }
+    LaunchedEffect(options) { if (options != null) linkSheet = false }
     LaunchedEffect(model) {
         model.queued.collectLatest { count ->
+            linkSheet = false
             val result = snackbar.showSnackbar(if (count == 1) "Download added" else "$count downloads added", "View", duration = SnackbarDuration.Short)
-            if (result == SnackbarResult.ActionPerformed) {
-                settings = false
-                showTransfers = true
-                destination = 1
-            }
+            if (result == SnackbarResult.ActionPerformed) destination = 0
         }
     }
-    BackHandler(enabled = settings || destination != 0) { if (settings) settings = false else destination = 0 }
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        snackbarHost = { SnackbarHost(snackbar) },
-        topBar = { OrcaTopBar(settings) { settings = false } },
-        bottomBar = {
-            OrcaNavigation(if (settings) 2 else destination) { next ->
-                settings = next == 2
-                if (!settings) destination = next
-            }
-        }
-    ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
-            val screenModifier = Modifier.widthIn(max = OrcaLayout.contentMaxWidth).fillMaxSize()
-            screenState.SaveableStateProvider(if (settings) "settings" else "destination-$destination") {
-                if (settings) {
-                    SettingsScreen(
-                        screenModifier, ask, version,
-                        busy = busy || updatingEngine || items.any { it.state in DownloadRepository.activeStates },
-                        setAsk = { value -> model.action { model.repo.preferences.setAsk(value) } },
-                        update = model::update,
-                        checkingAppUpdate = checkingAppUpdate,
-                        appUpdateStatus = appUpdateStatus,
-                        checkAppUpdate = model::checkAppUpdate,
-                    )
-                } else if (destination == 0) LazyColumn(
-                    screenModifier,
-                    contentPadding = PaddingValues(OrcaLayout.pageInset),
-                    verticalArrangement = Arrangement.spacedBy(OrcaLayout.homeItemGap),
-                ) {
-                    item {
-                        LinkComposer(link, busy, updatingEngine, ask, { model.link.value = it }, {
-                            val clip = context.getSystemService(ClipboardManager::class.java).primaryClip
-                            val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)
-                            val pasted = LinkParser.fromText(text?.toString().orEmpty())
-                            if (pasted != null) model.link.value = pasted
-                            else {
-                                model.details.value = ""
-                                model.message.value = "The clipboard doesn’t contain a valid link."
-                            }
-                        }, { model.start(configure = true) }, { model.start() }, { model.start(playlist = true) })
+    BackHandler(enabled = destination != 0 && !drawer.isOpen) { destination = if (destination == 2) previous else 0 }
+    ModalNavigationDrawer(
+        drawerContent = { OrcaDrawerContent(destinations, destination, ::navigate) },
+        drawerState = drawer,
+        gesturesEnabled = drawer.isOpen || destination != 2,
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbar) },
+            contentWindowInsets = if (destination == 2) WindowInsets(0) else ScaffoldDefaults.contentWindowInsets,
+            floatingActionButton = {
+                if (destination != 2) FloatingActionButton(onClick = { linkSheet = true }) {
+                    Icon(Icons.Outlined.FileDownload, "New download")
+                }
+            },
+        ) { padding ->
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+                val screenModifier = if (destination == 2) Modifier.fillMaxSize() else Modifier.widthIn(max = OrcaLayout.contentMaxWidth).fillMaxSize()
+                screenState.SaveableStateProvider("destination-$destination") {
+                    when (destination) {
+                        0 -> QueueScreen(screenModifier, items, openDrawer, actions, { sheetItemId = it.id }, { linkSheet = true })
+                        1 -> LibraryScreen(screenModifier, items, openDrawer, { play(it) }, { sheetItemId = it.id }, { linkSheet = true })
+                        else -> SettingsScreen(
+                            screenModifier, ask, version,
+                            busy = busy || updatingEngine || items.any { it.state in DownloadRepository.activeStates },
+                            setAsk = { value -> model.action { model.repo.preferences.setAsk(value) } },
+                            update = model::update,
+                            checkingAppUpdate = checkingAppUpdate,
+                            appUpdateStatus = appUpdateStatus,
+                            checkAppUpdate = model::checkAppUpdate,
+                            back = { destination = previous },
+                        )
                     }
-                    item {
-                        CollectionSummary(
-                            saved = items.count { it.state == "COMPLETED" },
-                            active = items.count { it.state in DownloadRepository.activeStates },
-                            needsAttention = items.count { it.state != "COMPLETED" && it.state !in DownloadRepository.activeStates },
-                        ) {
-                            showTransfers = items.any { it.state != "COMPLETED" }
-                            destination = 1
-                        }
-                    }
-                } else {
-                    LibraryScreen(
-                        screenModifier, items, showTransfers,
-                        selectTransfers = { showTransfers = it },
-                        onPlay = { play(it) },
-                        onShare = { share(context, it, model) },
-                        onCancel = { model.action { model.repo.cancel(it.id) } },
-                        onResume = { model.action { model.repo.resume(it) } },
-                        onDelete = { deleting = it },
-                        onError = { errorItem = it },
-                        onLink = { openLink(context, it.url) },
-                        onNewDownload = { destination = 0 },
-                    )
                 }
             }
         }
     }
+    if (linkSheet) LinkSheet(
+        link, busy, updatingEngine, ask, { model.link.value = it },
+        paste = {
+            val clip = context.getSystemService(ClipboardManager::class.java).primaryClip
+            val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)
+            val pasted = LinkParser.fromText(text?.toString().orEmpty())
+            if (pasted != null) model.link.value = pasted
+            else {
+                model.details.value = ""
+                model.message.value = "The clipboard doesn’t contain a valid link."
+            }
+        },
+        options = { model.start(configure = true) },
+        download = { model.start() },
+        playlist = { model.start(playlist = true) },
+        dismiss = { linkSheet = false },
+    )
+    sheetItemId?.let { id ->
+        val item = items.firstOrNull { it.id == id }
+        if (item == null) SideEffect { sheetItemId = null } else ActionSheet(item, actions) { sheetItemId = null }
+    }
     options?.let { data -> OptionsSheet(data, { if (!submitting) model.options.value = null }, model::enqueue, submitting) }
     appRelease?.let { release ->
-        AlertDialog(onDismissRequest = { model.availableAppRelease.value = null }, title = { Text("Orca ${release.versionName} is available") },
+        AlertDialog(onDismissRequest = { model.availableAppRelease.value = null }, icon = { OrcaAvatar(Modifier.size(40.dp)) }, title = { Text("Orca ${release.versionName} is available") },
             text = { Column { Text("Installed: ${BuildConfig.VERSION_NAME}. Download the update from GitHub, then open the APK to install it. Android will ask you to approve the installation."); TextButton(onClick = { openLink(context, release.pageUrl) }) { Text("Release notes") } } },
             confirmButton = { TextButton(onClick = {
                 model.availableAppRelease.value = null
@@ -306,160 +324,141 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
     }
     if (message != null) ErrorDialog(message.orEmpty(), details, { model.message.value = null; model.details.value = "" })
     errorItem?.let { item -> ErrorDialog(item.error, item.details, { errorItem = null }) }
-    deleting?.let { item -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text("Delete download?") }, text = { Text("Delete “${item.title}” from Orca and device storage?") }, confirmButton = { TextButton(onClick = { model.action { model.repo.delete(item) }; deleting = null }) { Text("Delete", color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = { deleting = null }) { Text("Keep") } }) }
+    deleting?.let { item -> AlertDialog(onDismissRequest = { deleting = null }, icon = { Icon(Icons.Outlined.Delete, null) }, title = { Text("Delete download?") }, text = { Text("Delete “${item.title}” from Orca and device storage?") }, confirmButton = { TextButton(onClick = { model.action { model.repo.delete(item) }; deleting = null }) { Text("Delete", color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = { deleting = null }) { Text("Keep") } }) }
     playing?.let { item -> PlayerDialog(item, { playing = null }, { externalPlayer(context, item, model) }) }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+private val queueFilters = listOf("All", "Downloading", "Stopped", "Finished")
+
+@Composable private fun QueueScreen(
+    modifier: Modifier,
+    downloads: List<DownloadItem>,
+    openDrawer: () -> Unit,
+    actions: DownloadActions,
+    showActions: (DownloadItem) -> Unit,
+    newDownload: () -> Unit,
+) {
+    var filter by rememberSaveable { mutableIntStateOf(0) }
+    var grid by rememberSaveable { mutableStateOf(true) }
+    val visible = when (filter) {
+        1 -> downloads.filter { it.active }
+        2 -> downloads.filter { it.stopped }
+        3 -> downloads.filter { it.completed }
+        else -> downloads
+    }
+    Column(modifier) {
+        OrcaHeader("Download queue", openDrawer) {
+            if (downloads.isNotEmpty()) IconButton(onClick = { grid = !grid }) {
+                Icon(
+                    if (grid) Icons.AutoMirrored.Outlined.ViewList else Icons.Outlined.GridView,
+                    if (grid) "Show as list" else "Show as grid",
+                )
+            }
+        }
+        if (downloads.isEmpty()) {
+            EmptyPlaceholder(
+                "No downloads yet", "Add a video or playlist link to start your first download.",
+                Modifier.verticalScroll(rememberScrollState()),
+            ) { FilledButtonWithIcon("Add a link", Icons.Outlined.Link, newDownload) }
+            return@Column
+        }
+        SelectionGroupRow(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = OrcaLayout.pageInset, vertical = 4.dp)) {
+            queueFilters.forEachIndexed { index, label ->
+                SelectionGroupItem(filter == index, { filter = index }) { Text(label) }
+            }
+        }
+        Text(
+            mediaCountLabel(visible), Modifier.padding(horizontal = OrcaLayout.pageInset, vertical = 12.dp),
+            style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (visible.isEmpty()) {
+            EmptyPlaceholder("Nothing here", "No downloads match this filter.", Modifier.verticalScroll(rememberScrollState())) {
+                TextButton(onClick = { filter = 0 }) { Text("Show all") }
+            }
+        } else if (grid) {
+            LazyVerticalGrid(
+                GridCells.Adaptive(OrcaLayout.gridMinCellWidth), Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = OrcaLayout.pageInset, end = OrcaLayout.pageInset, bottom = OrcaLayout.fabClearance + 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(visible, key = { it.id }) { item ->
+                    MediaCard(item, { showActions(item) }, { actions.primary(item) }, { showActions(item) })
+                }
+            }
+        } else {
+            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = OrcaLayout.fabClearance + 16.dp)) {
+                items(visible, key = { it.id }) { item -> MediaListItem(item, { showActions(item) }, { showActions(item) }) }
+            }
+        }
+    }
+}
+
 @Composable private fun LibraryScreen(
     modifier: Modifier,
     downloads: List<DownloadItem>,
-    showTransfers: Boolean,
-    selectTransfers: (Boolean) -> Unit,
+    openDrawer: () -> Unit,
     onPlay: (DownloadItem) -> Unit,
-    onShare: (DownloadItem) -> Unit,
-    onCancel: (DownloadItem) -> Unit,
-    onResume: (DownloadItem) -> Unit,
-    onDelete: (DownloadItem) -> Unit,
-    onError: (DownloadItem) -> Unit,
-    onLink: (DownloadItem) -> Unit,
-    onNewDownload: () -> Unit,
+    showActions: (DownloadItem) -> Unit,
+    newDownload: () -> Unit,
 ) {
     var search by rememberSaveable { mutableStateOf("") }
     var filter by rememberSaveable { mutableIntStateOf(0) }
     val focus = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
-    val saved = downloads.filter { it.state == "COMPLETED" }
-    val transfers = downloads.filter { it.state != "COMPLETED" }
-        .sortedBy { it.state !in DownloadRepository.activeStates }
+    val saved = downloads.filter { it.completed }
     val visible = saved.filter { it.title.contains(search.trim(), true) && (filter == 0 || (filter == 2) == it.audio) }
-    val actions: @Composable (DownloadItem) -> Unit = { item ->
-        DownloadCard(item, { onPlay(item) }, { onShare(item) }, { onCancel(item) },
-            { onResume(item) }, { onDelete(item) }, { onError(item) }, { onLink(item) })
-    }
-    LazyColumn(modifier, state = listState, contentPadding = PaddingValues(OrcaLayout.pageInset),
-        verticalArrangement = Arrangement.spacedBy(OrcaLayout.libraryItemGap)) {
-        item { Text("Your library", style = OrcaTextStyles.hero) }
-        item {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(OrcaSpacing.sm)) {
-                FilterChip(!showTransfers, { selectTransfers(false) }, label = { Text("Saved media (${saved.size})") },
-                    modifier = Modifier.heightIn(min = OrcaLayout.touchTarget))
-                FilterChip(showTransfers, { focus.clearFocus(); selectTransfers(true) }, label = { Text("Transfers (${transfers.size})") },
-                    modifier = Modifier.heightIn(min = OrcaLayout.touchTarget))
+    val filtering = search.isNotBlank() || filter != 0
+    Column(modifier) {
+        OrcaHeader("Library", openDrawer)
+        LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = OrcaLayout.fabClearance + 16.dp)) {
+            item {
+                OutlinedTextField(
+                    search, { search = it },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = OrcaLayout.pageInset),
+                    label = { Text("Search downloads") },
+                    leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                    singleLine = true, shape = CircleShape,
+                    trailingIcon = { if (search.isNotEmpty()) IconButton(onClick = { search = "" }) { Icon(Icons.Default.Close, "Clear search") } },
+                )
             }
-        }
-        if (showTransfers) {
-            if (transfers.isEmpty()) item {
-                EmptyLibrary("No transfers", "New downloads and items you can retry appear here.", Icons.Default.FileDownload) {
-                    TextButton(onClick = onNewDownload) { Text("Add a link") }
-                }
-            }
-            items(transfers, key = { it.id }, contentType = { "transfer" }) { actions(it) }
-            return@LazyColumn
-        }
-        item {
-            OutlinedTextField(
-                search, { search = it }, modifier = Modifier.fillMaxWidth(),
-                label = { Text("Search downloads") }, leadingIcon = { Icon(Icons.Default.Search, null) },
-                singleLine = true, shape = OrcaShapes.searchInput,
-                trailingIcon = { if (search.isNotEmpty()) IconButton(onClick = { search = "" }) { Icon(Icons.Default.Close, "Clear search") } },
-            )
-        }
-        item {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(OrcaSpacing.sm)) {
-                listOf("All", "Video", "Audio").forEachIndexed { index, label ->
-                    FilterChip(filter == index, { filter = index }, label = { Text(label) },
-                        shape = OrcaShapes.button, modifier = Modifier.heightIn(min = OrcaLayout.touchTarget))
-                }
-            }
-        }
-        val filtering = search.isNotBlank() || filter != 0
-        if (visible.isEmpty() && filtering) item {
-            Column(
-                Modifier.fillMaxWidth().padding(vertical = OrcaSpacing.sm),
-                verticalArrangement = Arrangement.spacedBy(OrcaSpacing.xs),
-            ) {
-                Text("No matching downloads", style = MaterialTheme.typography.titleMedium)
-                Text("Try another title or change the media filter.", style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                TextButton(onClick = {
-                    focus.clearFocus()
-                    keyboard?.hide()
-                    search = ""
-                    filter = 0
-                    listState.requestScrollToItem(0)
-                }) { Text("Reset filters") }
-            }
-        }
-        if (visible.isEmpty() && !filtering) item {
-            EmptyLibrary(
-                "No saved media yet", "Add a link to save your first video or audio track.", Icons.Default.FolderOpen,
-            ) { TextButton(onClick = onNewDownload) { Text("Add a link") } }
-        }
-        items(visible, key = { it.id }, contentType = { "saved" }) { actions(it) }
-    }
-}
-
-@Composable private fun DownloadCard(item: DownloadItem, onPlay: () -> Unit, onShare: () -> Unit, onCancel: () -> Unit, onResume: () -> Unit, onDelete: () -> Unit, onError: () -> Unit, onLink: () -> Unit) {
-    val completed = item.state == "COMPLETED"
-    val active = item.state in DownloadRepository.activeStates
-    var menu by remember { mutableStateOf(false) }
-    Card(Modifier.fillMaxWidth(), shape = OrcaShapes.downloadCard,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(OrcaLayout.dividerWidth, MaterialTheme.colorScheme.outlineVariant)) {
-        Column(Modifier.padding(DownloadCardMetrics.padding), verticalArrangement = Arrangement.spacedBy(DownloadCardMetrics.contentGap)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DownloadCardMetrics.rowGap)) {
-                Row(Modifier.weight(1f).then(if (completed) Modifier.clickable(onClickLabel = "Play ${item.title}", onClick = onPlay) else Modifier), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DownloadCardMetrics.rowGap)) {
-                    Box(Modifier.size(DownloadCardMetrics.thumbnailWidth, DownloadCardMetrics.thumbnailHeight).clip(DownloadCardMetrics.thumbnailRadius).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                        Icon(if (item.audio) Icons.Default.Headphones else Icons.Default.VideoLibrary, null,
-                            tint = MaterialTheme.colorScheme.primary)
-                        if (item.thumbnail.isNotBlank()) {
-                            AsyncImage(item.thumbnail, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                        }
-                        if (completed) Surface(
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = OrcaShapes.badge,
-                        ) {
-                            Icon(Icons.Default.PlayArrow, null, Modifier.size(OrcaSpacing.xl),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            if (saved.isNotEmpty()) {
+                item {
+                    SelectionGroupRow(Modifier.padding(horizontal = OrcaLayout.pageInset, vertical = 12.dp)) {
+                        listOf("All", "Video", "Audio").forEachIndexed { index, label ->
+                            SelectionGroupItem(filter == index, { filter = index }) { Text(label) }
                         }
                     }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OrcaSpacing.xs)) {
-                        Text(item.title, style = OrcaTextStyles.downloadTitle, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        Text(listOf(if (item.audio) "Audio" else "Video", duration(item.duration), size(item.bytes)).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
                 }
-                Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "More actions for ${item.title}") }
-                    DropdownMenu(menu, { menu = false }) {
-                        if (completed) DropdownMenuItem(text = { Text("Share") },
-                            leadingIcon = { Icon(Icons.Default.Share, null) }, onClick = { menu = false; onShare() })
-                        DropdownMenuItem(text = { Text("Original link") }, leadingIcon = { Icon(Icons.Default.Link, null) }, onClick = { menu = false; onLink() })
-                        if (!active) DropdownMenuItem(text = { Text("Delete", color = MaterialTheme.colorScheme.error) }, leadingIcon = { Icon(Icons.Default.DeleteOutline, null, tint = MaterialTheme.colorScheme.error) }, onClick = { menu = false; onDelete() })
-                    }
+                item {
+                    Text(
+                        mediaCountLabel(visible), Modifier.padding(horizontal = OrcaLayout.pageInset, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
-            if (active) {
-                if (item.progress >= 0) LinearProgressIndicator(progress = { (item.progress / 100f).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) else LinearProgressIndicator(Modifier.fillMaxWidth())
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(item.state.lowercase().replaceFirstChar { it.uppercase() } + if (item.progress >= 0) " · ${item.progress.toInt()}%" else "", Modifier.weight(1f), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = onCancel) { Text("Cancel") }
-                }
-            } else if (!completed) {
-                Surface(color = if (item.state == "FAILED") MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant, shape = OrcaShapes.badge) {
-                    Text(item.error.ifBlank { item.state.lowercase().replaceFirstChar { it.uppercase() } }, Modifier.padding(OrcaSpacing.md), style = MaterialTheme.typography.bodySmall)
-                }
-                Row {
-                    TextButton(onClick = onResume) { OrcaActionLabel(if (item.state == "FAILED") "Retry" else "Resume", Icons.Default.Refresh) }
-                    if (item.details.isNotBlank()) TextButton(onClick = onError) { Text("Details") }
+            if (saved.isNotEmpty() && visible.isEmpty() && filtering) item {
+                EmptyPlaceholder("No matching downloads", "Try another title or change the media filter.") {
+                    TextButton(onClick = {
+                        focus.clearFocus()
+                        keyboard?.hide()
+                        search = ""
+                        filter = 0
+                        listState.requestScrollToItem(0)
+                    }) { Text("Reset filters") }
                 }
             }
+            if (saved.isEmpty()) item {
+                EmptyPlaceholder("No saved media yet", "Finished downloads appear here, ready to play offline.") {
+                    FilledButtonWithIcon("Add a link", Icons.Outlined.Link, newDownload)
+                }
+            }
+            items(visible, key = { it.id }) { item -> MediaListItem(item, { onPlay(item) }, { showActions(item) }) }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun SettingsScreen(
     modifier: Modifier,
     ask: Boolean,
@@ -470,66 +469,80 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
     checkingAppUpdate: Boolean,
     appUpdateStatus: String,
     checkAppUpdate: () -> Unit,
+    back: () -> Unit,
 ) {
     var notices by rememberSaveable { mutableStateOf(false) }
-    LazyColumn(modifier, contentPadding = PaddingValues(OrcaLayout.settingsInset),
-        verticalArrangement = Arrangement.spacedBy(OrcaLayout.settingsSectionGap)) {
-        item {
-            SectionHeading("Download preferences")
-            Spacer(Modifier.height(OrcaSpacing.sm))
-            OrcaPanel {
-                Row(
-                    Modifier.fillMaxWidth().heightIn(min = OrcaLayout.touchTarget)
-                        .toggleable(ask, role = Role.Switch, onValueChange = setAsk),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(OrcaSpacing.md),
-                ) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OrcaSpacing.xs)) {
-                        Text("Ask before downloading", style = MaterialTheme.typography.titleMedium)
-                        Text("Choose a format and quality for each link.", style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Switch(ask, onCheckedChange = null)
-                }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                InfoLine(Icons.Default.FolderOpen, "Download folders", "Video: Movies/Orca\nAudio: Music/Orca")
-            }
-        }
-        item {
-            SectionHeading("Updates")
-            Spacer(Modifier.height(OrcaSpacing.sm))
-            OrcaPanel {
-                InfoLine(Icons.Default.SystemUpdate, "Orca ${BuildConfig.VERSION_NAME}", "App releases from GitHub")
-                OrcaOutlinedActionButton(
-                    text = if (checkingAppUpdate) "Checking…" else "Check for updates", icon = Icons.Default.Refresh,
-                    onClick = checkAppUpdate, enabled = !checkingAppUpdate,
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    Scaffold(
+        modifier.nestedScroll(scroll.nestedScrollConnection),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = { IconButton(onClick = back) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
+                scrollBehavior = scroll,
+            )
+        },
+    ) { padding ->
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+            item { PreferenceSubtitle("Downloads") }
+            item {
+                PreferenceSwitch(
+                    "Ask before downloading", "Choose a format and quality for each link.", Icons.Outlined.Tune,
+                    ask, setAsk,
                 )
-                if (checkingAppUpdate) LinearProgressIndicator(Modifier.fillMaxWidth())
-                if (appUpdateStatus.isNotBlank()) Text(appUpdateStatus, Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                InfoLine(Icons.Default.Memory, "Download engine", "yt-dlp · $version")
-                OrcaOutlinedActionButton("Check for engine update", Icons.Default.Refresh, update, enabled = !busy)
-                if (busy) Text("Available when transfers and inspections are idle.", style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-        }
-        item {
-            SectionHeading("About")
-            Spacer(Modifier.height(OrcaSpacing.sm))
-            OrcaPanel {
-                Text("Orca saves files on your device for offline use.", style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = { notices = !notices }) {
-                    Text(if (notices) "Hide open source notices" else "Open source notices")
-                    Spacer(Modifier.width(OrcaSpacing.sm))
-                    Icon(if (notices) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+            item { PreferenceItem("Download folders", "Video: Movies/Orca\nAudio: Music/Orca", Icons.Outlined.FolderOpen) }
+            item { PreferenceSubtitle("Updates") }
+            item {
+                PreferenceItem(
+                    "Check for updates", if (checkingAppUpdate) "Checking…" else "Orca ${BuildConfig.VERSION_NAME}",
+                    Icons.Outlined.SystemUpdate, enabled = !checkingAppUpdate, onClick = checkAppUpdate,
+                )
+            }
+            if (checkingAppUpdate) item { LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 56.dp)) }
+            if (appUpdateStatus.isNotBlank()) item {
+                Text(
+                    appUpdateStatus, Modifier.padding(start = 56.dp, end = 16.dp, bottom = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            item {
+                PreferenceItem(
+                    "Check for engine update",
+                    "yt-dlp · $version" + if (busy) "\nAvailable when transfers and inspections are idle." else "",
+                    Icons.Outlined.Memory, enabled = !busy, onClick = update,
+                )
+            }
+            item { PreferenceSubtitle("About") }
+            item {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OrcaAvatar(Modifier.size(56.dp))
+                    Column(Modifier.padding(start = 16.dp)) {
+                        Text("Orca", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            "Version ${BuildConfig.VERSION_NAME} · Saves files on your device for offline use.",
+                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
-                if (notices) Text(
-                    "yt-dlp — Unlicense\nyoutubedl-android — MIT\nFFmpeg — LGPL/GPL\nPython — PSF License\n" +
+            }
+            item {
+                PreferenceItem(
+                    "Open source notices", if (notices) "Hide licenses" else "Licenses for Orca's components",
+                    Icons.Outlined.Description, onClick = { notices = !notices },
+                    trailing = { Icon(if (notices) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null, Modifier.padding(end = 8.dp)) },
+                )
+            }
+            if (notices) item {
+                Text(
+                    "Interface design adapted from Seal — GPL-3.0\n" +
+                        "yt-dlp — Unlicense\nyoutubedl-android — MIT\nFFmpeg — LGPL/GPL\nPython — PSF License\n" +
                         "QuickJS — MIT\nAndroidX, Kotlin and Coil — Apache 2.0\n\nFull notices are included in the app assets.",
+                    Modifier.padding(start = 56.dp, end = 16.dp, bottom = 16.dp),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            item { Spacer(Modifier.navigationBarsPadding().height(16.dp)) }
         }
     }
 }
@@ -565,7 +578,7 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
         onDispose { lifecycle.removeObserver(observer); player.removeListener(listener); player.release() }
     }
     Dialog(onDismissRequest = dismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        DarkDialogSystemBars()
+        DialogSystemBars(dark = true)
         Surface(
             Modifier.fillMaxSize(),
             color = OrcaPlayerColors.background,
@@ -598,9 +611,7 @@ class OrcaModel(application: Application, savedState: SavedStateHandle = SavedSt
                         style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (error) Text("This device couldn’t play the file.", color = MaterialTheme.colorScheme.error)
-                    TextButton(onClick = { player.pause(); external() }) {
-                        OrcaActionLabel("Open with another app", Icons.AutoMirrored.Filled.OpenInNew)
-                    }
+                    TextButtonWithIcon("Open with another app", Icons.AutoMirrored.Filled.OpenInNew, { player.pause(); external() })
                 }
             }
         }

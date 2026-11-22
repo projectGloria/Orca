@@ -80,12 +80,12 @@ class ReliabilityRegressionTest {
     }
 
     @Test fun librarySearchSurvivesSettingsRoundTrip() {
-        rule.onNodeWithText("Downloads").performClick()
+        rule.openDestination("Library")
         rule.onNodeWithText("Search downloads").performTextInput("audit-preserve-my-search")
         rule.onNodeWithText("audit-preserve-my-search").assertExists()
-        rule.onNodeWithText("Settings").performClick()
+        rule.openDestination("Settings")
         rule.onNodeWithContentDescription("Back").performClick()
-        rule.onNodeWithText("Your library").assertIsDisplayed()
+        rule.onHeading("Library").assertIsDisplayed()
         rule.onNodeWithText("audit-preserve-my-search").assertExists()
     }
 
@@ -233,7 +233,7 @@ class ReliabilityRegressionTest {
             saved = item.copy(uri = uri, mime = mime, state = "COMPLETED")
             repo.publisher.publish(uri, output)
             repo.dao.put(saved)
-            rule.onNodeWithText("Downloads").performClick()
+            rule.openDestination("Library")
             rule.waitUntil(10000) { rule.onAllNodesWithText(item.title).fetchSemanticsNodes().isNotEmpty() }
             rule.onNodeWithText(item.title).performClick()
             rule.onNodeWithContentDescription("Close player").assertIsDisplayed()
